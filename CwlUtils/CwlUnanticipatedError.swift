@@ -54,11 +54,19 @@ public extension ErrorType {
 
 /// A convenience wrapper that applies `withUnanticipatedErrorRecoveryAttempter` to any error thrown by the wrapped function
 public func rethrowUnanticipated<T>(file file: String = #file, line: Int = #line, @noescape f: () throws -> T) throws -> T {
-	do {
-		return try f()
-	} catch {
-		throw error.withUnanticipatedErrorRecoveryAttempter(file: file, line: line)
-	}
+    do {
+        return try f()
+    } catch {
+        throw error.withUnanticipatedErrorRecoveryAttempter(file: file, line: line)
+    }
+}
+
+public func rethrowUnanticipated<T>(file file: String = #file, line: Int = #line, @autoclosure _ f: () throws -> T) throws -> T {
+    do {
+        return try f()
+    } catch {
+        throw error.withUnanticipatedErrorRecoveryAttempter(file: file, line: line)
+    }
 }
 
 /// Class usable as the NSRecoveryAttempterErrorKey object in an NSError that presents the 'Unexpected' error and gives the option of copying the full error to the pasteboard.
