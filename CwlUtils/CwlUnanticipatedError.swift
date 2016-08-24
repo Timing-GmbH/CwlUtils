@@ -32,6 +32,10 @@ public extension ErrorType {
 		let e = ((self as? NSObject) as? NSError) ?? (self as NSError)
 		var userInfo: [NSObject: AnyObject] = e.userInfo
 		
+		if userInfo[NSLocalizedDescriptionKey] == nil, let description = (self as? CustomStringConvertible)?.description {
+			userInfo[NSLocalizedDescriptionKey] = description
+		}
+		
 		// Move any existing NSLocalizedRecoverySuggestionErrorKey to a new key (we want to replace it but don't want to lose potentially useful information)
 		if let previousSuggestion = userInfo[NSLocalizedRecoverySuggestionErrorKey] {
 			userInfo[UnanticipatedErrorRecoveryAttempter.PreviousRecoverySuggestionKey] = previousSuggestion
