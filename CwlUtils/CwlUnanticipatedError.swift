@@ -65,14 +65,6 @@ public func rethrowUnanticipated<T>(file: String = #file, line: Int = #line, f: 
     }
 }
 
-public func rethrowUnanticipated<T>(file: String = #file, line: Int = #line, _ f: @autoclosure () throws -> T) throws -> T {
-    do {
-        return try f()
-    } catch {
-        throw error.withUnanticipatedErrorRecoveryAttempter(file: file, line: line)
-    }
-}
-
 /// Class usable as the NSRecoveryAttempterErrorKey object in an NSError that presents the 'Unexpected' error and gives the option of copying the full error to the pasteboard.
 public class UnanticipatedErrorRecoveryAttempter: NSObject {
 	/// Key used in NSError.userInfo dictionaries to store call stack addresses
