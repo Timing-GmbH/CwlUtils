@@ -66,7 +66,7 @@ public func rethrowUnanticipated<T>(file: String = #file, line: Int = #line, f: 
 }
 
 /// Class usable as the NSRecoveryAttempterErrorKey object in an NSError that presents the 'Unexpected' error and gives the option of copying the full error to the pasteboard.
-public class UnanticipatedErrorRecoveryAttempter: NSObject {
+open class UnanticipatedErrorRecoveryAttempter: NSObject {
 	/// Key used in NSError.userInfo dictionaries to store call stack addresses
 	public static let ReturnAddressesKey = "CwlUtils.CallStackReturnAddresses"
 
@@ -74,17 +74,17 @@ public class UnanticipatedErrorRecoveryAttempter: NSObject {
 	public static let PreviousRecoverySuggestionKey = "CwlUtils.PreviousRecoverySuggestion"
 
 	/// Present two buttons: "Copy details" and "OK"
-	fileprivate class func localizedRecoveryOptions() -> [String] {
+	public class func localizedRecoveryOptions() -> [String] {
 		return [NSLocalizedString("OK", comment:""), NSLocalizedString("Copy details", comment:"")]
 	}
 	
 	/// There are two possible `attemptRecoveryFromError` methods. This one just feeds into the other.
-	public override func attemptRecovery(fromError error: Error, optionIndex: Int, delegate: Any?, didRecoverSelector: Selector?, contextInfo: UnsafeMutableRawPointer?) -> Void {
+	open override func attemptRecovery(fromError error: Error, optionIndex: Int, delegate: Any?, didRecoverSelector: Selector?, contextInfo: UnsafeMutableRawPointer?) -> Void {
 		_ = self.attemptRecovery(fromError: error, optionIndex: optionIndex)
 	}
 	
 	/// Generate the "detailed" information for the pasteboard (the error dialog itself will show the brief details)
-	private func extendedErrorInformation(_ error: NSError) -> String {
+	open func extendedErrorInformation(_ error: NSError) -> String {
 		var userInfo = error.userInfo
 		
 		// Fetch and format diagnostic information for display
@@ -107,7 +107,7 @@ public class UnanticipatedErrorRecoveryAttempter: NSObject {
 	}
 	
 	/// When a button is tapped, either close the dialog or copy the error details as appropriate.
-	public override func attemptRecovery(fromError error: Error, optionIndex: Int) -> Bool {
+	open override func attemptRecovery(fromError error: Error, optionIndex: Int) -> Bool {
 		// The "Copy details" button is index 1 in the buttons array.
 		let copyDetailsButtonIndex = 1
 		
