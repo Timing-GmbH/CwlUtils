@@ -32,7 +32,7 @@ public extension Error {
 		let e = self as NSError
 		var userInfo: [AnyHashable: Any] = e.userInfo
 		
-		if userInfo[NSLocalizedDescriptionKey] == nil, let description = (self as? CustomStringConvertible)?.description {
+		if userInfo[NSLocalizedDescriptionKey] == nil, let description = (self as CustomStringConvertible?)?.description {
 			userInfo[NSLocalizedDescriptionKey] = description
 		}
 		
