@@ -32,8 +32,8 @@ public extension Error {
 		let e = self as NSError
 		var userInfo: [AnyHashable: Any] = e.userInfo
 		
-		if userInfo[NSLocalizedDescriptionKey] == nil, let description = (self as CustomStringConvertible?)?.description {
-			userInfo[NSLocalizedDescriptionKey] = description
+		if userInfo[NSLocalizedDescriptionKey] == nil {
+			userInfo[NSLocalizedDescriptionKey] = String(describing: self)
 		}
 		
 		// Move any existing NSLocalizedRecoverySuggestionErrorKey to a new key (we want to replace it but don't want to lose potentially useful information)
