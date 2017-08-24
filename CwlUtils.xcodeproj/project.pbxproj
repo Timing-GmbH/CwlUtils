@@ -1614,7 +1614,7 @@
 				C945D7B91E5033C6009AFB8E /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Debug;
+			defaultConfigurationName = Release;
 		};
 		C95A773E1E4187E700659DBD /* Build configuration list for PBXNativeTarget "CwlUtils_macOSTestApp" */ = {
 			isa = XCConfigurationList;
@@ -1623,7 +1623,7 @@
 				C95A77401E4187E700659DBD /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Debug;
+			defaultConfigurationName = Release;
 		};
 		C95A77411E4187E700659DBD /* Build configuration list for PBXNativeTarget "CwlUtils_macOSTestAppUITests" */ = {
 			isa = XCConfigurationList;
@@ -1632,7 +1632,7 @@
 				C95A77431E4187E700659DBD /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Debug;
+			defaultConfigurationName = Release;
 		};
 		C95A77621E4187FB00659DBD /* Build configuration list for PBXNativeTarget "CwlUtils_iOSTestApp" */ = {
 			isa = XCConfigurationList;
@@ -1641,7 +1641,7 @@
 				C95A77641E4187FB00659DBD /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Debug;
+			defaultConfigurationName = Release;
 		};
 		C95A77651E4187FB00659DBD /* Build configuration list for PBXNativeTarget "CwlUtils_iOSTestAppUITests" */ = {
 			isa = XCConfigurationList;
@@ -1650,7 +1650,7 @@
 				C95A77671E4187FB00659DBD /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Debug;
+			defaultConfigurationName = Release;
 		};
 		C95BDEB31E41688B00AAA64B /* Build configuration list for PBXNativeTarget "CwlUtils_iOS" */ = {
 			isa = XCConfigurationList;
@@ -1659,7 +1659,7 @@
 				C95BDEB51E41688B00AAA64B /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Debug;
+			defaultConfigurationName = Release;
 		};
 		C95BDED81E4168B800AAA64B /* Build configuration list for PBXNativeTarget "CwlUtils_iOSTests" */ = {
 			isa = XCConfigurationList;
@@ -1668,7 +1668,7 @@
 				C95BDEDA1E4168B800AAA64B /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Debug;
+			defaultConfigurationName = Release;
 		};
 		OBJ_150 /* Build configuration list for PBXNativeTarget "CwlUtils_macOS" */ = {
 			isa = XCConfigurationList;
@@ -1677,7 +1677,7 @@
 				OBJ_152 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Debug;
+			defaultConfigurationName = Release;
 		};
 		OBJ_199 /* Build configuration list for PBXNativeTarget "CwlUtils_macOSTests" */ = {
 			isa = XCConfigurationList;
@@ -1686,7 +1686,7 @@
 				OBJ_201 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Debug;
+			defaultConfigurationName = Release;
 		};
 		OBJ_2 /* Build configuration list for PBXProject "CwlUtils" */ = {
 			isa = XCConfigurationList;
@@ -1695,7 +1695,7 @@
 				OBJ_4 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Debug;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
