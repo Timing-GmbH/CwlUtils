@@ -821,12 +821,12 @@
 					};
 					C95A77471E4187FB00659DBD = {
 						CreatedOnToolsVersion = 8.3;
-						DevelopmentTeam = S7YQ892G6G;
+						DevelopmentTeam = NDB5JK3DZG;
 						ProvisioningStyle = Automatic;
 					};
 					C95A775A1E4187FB00659DBD = {
 						CreatedOnToolsVersion = 8.3;
-						DevelopmentTeam = S7YQ892G6G;
+						DevelopmentTeam = NDB5JK3DZG;
 						ProvisioningStyle = Automatic;
 						TestTargetID = C95A77471E4187FB00659DBD;
 					};
@@ -1283,7 +1283,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				DEVELOPMENT_TEAM = S7YQ892G6G;
+				DEVELOPMENT_TEAM = NDB5JK3DZG;
 				ENABLE_TESTABILITY = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
@@ -1316,7 +1316,7 @@
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = NO;
-				DEVELOPMENT_TEAM = S7YQ892G6G;
+				DEVELOPMENT_TEAM = NDB5JK3DZG;
 				ENABLE_NS_ASSERTIONS = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				INFOPLIST_FILE = Tests/CwlUtils_iOSTestApp/Info.plist;
@@ -1343,7 +1343,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				DEVELOPMENT_TEAM = S7YQ892G6G;
+				DEVELOPMENT_TEAM = NDB5JK3DZG;
 				ENABLE_TESTABILITY = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
@@ -1376,7 +1376,7 @@
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = NO;
-				DEVELOPMENT_TEAM = S7YQ892G6G;
+				DEVELOPMENT_TEAM = NDB5JK3DZG;
 				ENABLE_NS_ASSERTIONS = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				INFOPLIST_FILE = Tests/CwlUtilsTests/Info.plist;
