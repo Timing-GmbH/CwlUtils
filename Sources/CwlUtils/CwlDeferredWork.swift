@@ -18,6 +18,8 @@
 //  IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 //
 
+import Foundation
+
 // This type is designed for guarding against mutex re-entrancy by following two simple rules:
 //
 //  1. No user "work" (functions or closures) should be invoked inside a private mutex
@@ -37,7 +39,7 @@ public struct DeferredWork {
 	
 	var work: PossibleWork
 
-#if DEBUG
+#if CHECK_DEFERRED_WORK
 	let invokeCheck: OnDelete = { () -> OnDelete in
 		var sourceStack = callStackReturnAddresses(skip: 2)
 		return OnDelete {
@@ -55,9 +57,9 @@ public struct DeferredWork {
 	}
 	
 	public mutating func append(_ other: DeferredWork) {
-#if DEBUG
-		precondition(!invokeCheck.isCancelled, "Work appended to an already cancelled/invoked DeferredWork")
-		other.invokeCheck.cancel()
+#if CHECK_DEFERRED_WORK
+		precondition(invokeCheck.isValid && other.invokeCheck.isValid, "Work appended to an already cancelled/invoked DeferredWork")
+		other.invokeCheck.invalidate()
 #endif
 		switch other.work {
 		case .none: break
@@ -78,6 +80,9 @@ public struct DeferredWork {
 	}
 	
 	public mutating func append(_ additionalWork: @escaping () -> Void) {
+#if CHECK_DEFERRED_WORK
+		precondition(invokeCheck.isValid, "Work appended to an already cancelled/invoked DeferredWork")
+#endif
 		switch work {
 		case .none: work = .single(additionalWork)
 		case .single(let existing): work = .multiple([existing, additionalWork])
@@ -88,10 +93,10 @@ public struct DeferredWork {
 		}
 	}
 	
-	public func runWork() {
-#if DEBUG
-		precondition(!invokeCheck.isCancelled, "Work run multiple times")
-		invokeCheck.cancel()
+	public mutating func runWork() {
+#if CHECK_DEFERRED_WORK
+		precondition(invokeCheck.isValid, "Work run multiple times")
+		invokeCheck.invalidate()
 #endif
 		switch work {
 		case .none: break
@@ -101,5 +106,6 @@ public struct DeferredWork {
 				w()
 			}
 		}
+		work = .none
 	}
 }

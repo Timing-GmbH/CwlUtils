@@ -28,7 +28,15 @@ extension Collection {
 }
 
 extension RangeReplaceableCollection {
+	// In Swift 4, this can be replaced by `s += CollectionOfOne(e)`
 	public static func +=(s: inout Self, e: Iterator.Element) {
 		s.append(e)
+	}
+	
+	// In Swift 4, this can be replaced by `s + CollectionOfOne(e)`
+	public func appending(_ newElement: Iterator.Element) -> Self {
+		var result = self
+		result.append(newElement)
+		return result
 	}
 }

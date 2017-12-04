@@ -58,18 +58,6 @@ public enum ExecutionType {
 	}
 }
 
-/// This protocol exists to provide lifetime to asynchronous an ongoing tasks. Typically, this protocol is implemented by a `class` (so that releasing the type releases the underlying resource) but it may also be implemented by a `struct` which itself contains a `class` whose lifetime controls the underlying resource.
-///
-/// The pattern offered by this protocol is a rejection of patterns where an asynchronous or ongoing task is created without returning any lifetime object. In my opinion, such lifetime-less patterns are problematic since they fail to tie the lifetime of the asynchronous task to the context where the result is required. This failure to tie task to result context requires:
-///	* vigilance to remember to check for the context on completion
-///   * knowledge of the context to check if the task is still relevant
-///   * overuse of resources by cancelled or unwanted tasks that continue to completion before checking if they're still needed
-/// all of which are bad. Far better to return a lifetime object for *all* asynchronous or ongoing tasks.
-public protocol Cancellable: class {
-	/// Immediately cancel
-	func cancel()
-}
-
 /// An abstraction of common execution context concepts
 public protocol ExecutionContext {
 	/// A description about how functions will be invoked on an execution context.
@@ -132,16 +120,21 @@ extension ExecutionContext {
 extension DispatchSource: Cancellable {
 }
 
-/// An `ExecutionContext` implementation around a DispatchQueue.
-public struct CustomDispatchQueue: ExecutionContext {
+@available(*, deprecated, message:"Use DispatchQueueContext instead")
+public typealias CustomDispatchQueue = DispatchQueueContext
+
+/// Combines a `DispatchQueue` and an `ExecutionType` to create an `ExecutionContext`.
+public struct DispatchQueueContext: ExecutionContext {
+	/// The underlying DispatchQueue
 	public let queue: DispatchQueue
+
+	/// A description about how functions will be invoked on an execution context.
+	public let type: ExecutionType
+
 	public init(sync: Bool = true, concurrent: Bool = false, qos: DispatchQoS = .default) {
 		self.type = sync ? .mutex : (concurrent ? .concurrentAsync : .serialAsync)
 		queue = DispatchQueue(label: "", qos: qos, attributes: concurrent ? DispatchQueue.Attributes.concurrent : DispatchQueue.Attributes(), autoreleaseFrequency: .inherit, target: nil)
 	}
-
-	/// A description about how functions will be invoked on an execution context.
-	public let type: ExecutionType
 
 	/// Run `execute` normally on the execution context
 	public func invoke(_ execute: @escaping () -> Void) {
@@ -334,10 +327,10 @@ public enum Exec: ExecutionContext {
 	/// Invoked directly from the caller's context
 	case direct
 	
-	/// Invoked on the main thread, directly if the current thread is the main thread, otherwise asynchronously
+	/// Invoked on the main thread, directly if the current thread is the main thread, otherwise asynchronously (unless invokeAndWait is used)
 	case main
 	
-	/// Invoked on the main thread, always asynchronously
+	/// Invoked on the main thread, always asynchronously (unless invokeAndWait is used)
 	case mainAsync
 	
 	/// Invoked asynchronously in the global queue with QOS_CLASS_USER_INTERACTIVE priority
@@ -347,7 +340,7 @@ public enum Exec: ExecutionContext {
 	case user
 
 	/// Invoked asynchronously in the global queue with QOS_CLASS_DEFAULT priority
-	case `default`
+	case global
 
 	/// Invoked asynchronously in the global queue with QOS_CLASS_UTILITY priority
 	case utility
@@ -366,7 +359,7 @@ public enum Exec: ExecutionContext {
 		case .custom: return DispatchQueue.global()
 		case .interactive: return DispatchQueue.global(qos: .userInteractive)
 		case .user: return DispatchQueue.global(qos: .userInitiated)
-		case .default: return DispatchQueue.global()
+		case .global: return DispatchQueue.global()
 		case .utility: return DispatchQueue.global(qos: .utility)
 		case .background: return DispatchQueue.global(qos: .background)
 		}
@@ -382,7 +375,7 @@ public enum Exec: ExecutionContext {
 		case .custom(let c): return c.type
 		case .interactive: return .concurrentAsync
 		case .user: return .concurrentAsync
-		case .default: return .concurrentAsync
+		case .global: return .concurrentAsync
 		case .utility: return .concurrentAsync
 		case .background: return .concurrentAsync
 		}
@@ -417,7 +410,7 @@ public enum Exec: ExecutionContext {
 		case .direct: fallthrough
 		case .interactive: fallthrough
 		case .user: fallthrough
-		case .default: fallthrough
+		case .global: fallthrough
 		case .utility: fallthrough
 		case .background:
 			// For all other cases, assume the queue isn't actually required (and was only provided for asynchronous behavior). Just invoke the provided function directly.
@@ -435,12 +428,12 @@ public enum Exec: ExecutionContext {
 	
 	/// Constructs an `Exec.custom` wrapping a synchronous `DispatchQueue`
 	public static func syncQueue() -> Exec {
-		return Exec.custom(CustomDispatchQueue())
+		return Exec.custom(DispatchQueueContext())
 	}
 	
 	/// Constructs an `Exec.custom` wrapping a synchronous `DispatchQueue` with a `DispatchSpecificKey` set for the queue (so that it can be identified when active).
 	public static func syncQueueWithSpecificKey() -> (Exec, DispatchSpecificKey<()>) {
-		let cdq = CustomDispatchQueue()
+		let cdq = DispatchQueueContext()
 		let specificKey = DispatchSpecificKey<()>()
 		cdq.queue.setSpecific(key: specificKey, value: ())
 		return (Exec.custom(cdq), specificKey)
@@ -448,12 +441,12 @@ public enum Exec: ExecutionContext {
 	
 	/// Constructs an `Exec.custom` wrapping an asynchronous `DispatchQueue`
 	public static func asyncQueue(qos: DispatchQoS = .default) -> Exec {
-		return Exec.custom(CustomDispatchQueue(sync: false, qos: qos))
+		return Exec.custom(DispatchQueueContext(sync: false, qos: qos))
 	}
 	
 	/// Constructs an `Exec.custom` wrapping an asynchronous `DispatchQueue` with a `DispatchSpecificKey` set for the queue (so that it can be identified when active).
 	public static func asyncQueueWithSpecificKey(qos: DispatchQoS = .default) -> (Exec, DispatchSpecificKey<()>) {
-		let cdq = CustomDispatchQueue(sync: false, qos: qos)
+		let cdq = DispatchQueueContext(sync: false, qos: qos)
 		let specificKey = DispatchSpecificKey<()>()
 		cdq.queue.setSpecific(key: specificKey, value: ())
 		return (Exec.custom(cdq), specificKey)

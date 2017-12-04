@@ -24,12 +24,12 @@ import Foundation
 ///
 /// - unspecified: used when a initial DebugContextThread is not specified on startup (not used otherwise)
 /// - main: used by `main` and `mainAsync` contexts
-/// - `default`: used for a concurrent queues and for timers on direct
+/// - `global`: used for a concurrent queues and for timers on direct
 /// - custom: any custom queue
 public enum DebugContextThread: Hashable {
 	case unspecified
 	case main
-	case `default`
+	case global
 	case custom(String)
 
 	/// Convenience test to determine if an `Exec` instance wraps a `DebugContext` identifying `self` as its `thread`.
@@ -47,7 +47,7 @@ public enum DebugContextThread: Hashable {
 		switch self {
 		case .unspecified: return Int(0).hashValue
 		case .main: return Int(1).hashValue
-		case .default: return Int(2).hashValue
+		case .global: return Int(2).hashValue
 		case .custom(let s): return Int(3).hashValue ^ s.hashValue
 		}
 	}
@@ -64,7 +64,7 @@ public func ==(left: DebugContextThread, right: DebugContextThread) -> Bool {
 	case (.custom(let l), .custom(let r)) where l == r: return true
 	case (.unspecified, .unspecified): return true
 	case (.main, .main): return true
-	case (.default, .default): return true
+	case (.global, .global): return true
 	default: return false
 	}
 }
@@ -88,9 +88,14 @@ public class DebugContextCoordinator {
 		currentThread = .unspecified
 	}
 	
+	/// Constructs an empty instance
+	public init(initialThread: DebugContextThread) {
+		self.currentThread = initialThread
+	}
+	
 	/// Implementation mimicking Exec.direct but returning an Exec.custom(DebugContext)
 	public var direct: Exec {
-		return .custom(DebugContext(type: .immediate, thread: .default, coordinator: self))
+		return .custom(DebugContext(type: .immediate, thread: .global, coordinator: self))
 	}
 	
 	/// Implementation mimicking Exec.main but returning an Exec.custom(DebugContext)
@@ -104,8 +109,8 @@ public class DebugContextCoordinator {
 	}
 	
 	/// Implementation mimicking Exec.default but returning an Exec.custom(DebugContext)
-	public var `default`: Exec {
-		return .custom(DebugContext(type: .concurrentAsync, thread: .default, coordinator: self))
+	public var global: Exec {
+		return .custom(DebugContext(type: .concurrentAsync, thread: .global, coordinator: self))
 	}
 	
 	/// Implementation mimicking Exec.syncQueue but returning an Exec.custom(DebugContext)
@@ -123,7 +128,7 @@ public class DebugContextCoordinator {
 	/// Performs all scheduled actions in a serial loop.
 	///
 	/// - parameter stoppingAfter: If nil, loop will continue until `stop` invoked or until no actions remain. If non-nil, loop will abort after an action matching Cancellable is completed.
-	public func runScheduledTasks(stoppingAfter: Cancellable? = nil) {
+	public func runScheduledTasks(stoppingAfter: (AnyObject & Cancellable)? = nil) {
 		stopRequested = false
 		currentThread = .unspecified
 		while !stopRequested, let nextTimer = runNextTask() {
@@ -132,7 +137,9 @@ public class DebugContextCoordinator {
 			}
 		}
 		if stopRequested {
-			queues = [:]
+			// Since releasing `queues` will likely cause the release of closures and items held by the queue, which might lead to nested calls to remove items from `queues` violating ownership rules...
+			// We copy queues to a non-shared stack location, clear `queues` and *then* release the contents.
+			withExtendedLifetime(queues) { queues = [:] }
 		}
 	}
 	
@@ -146,7 +153,9 @@ public class DebugContextCoordinator {
 			_ = runTask(threadIndex: threadIndex, time: time)
 		}
 		if stopRequested {
-			queues = [:]
+			// Since releasing `queues` will likely cause the release of closures and items held by the queue, which might lead to nested calls to remove items from `queues` violating ownership rules...
+			// We copy queues to a non-shared stack location, clear `queues` and *then* release the contents.
+			withExtendedLifetime(queues) { queues = [:] }
 		}
 	}
 	
@@ -158,7 +167,10 @@ public class DebugContextCoordinator {
 	/// Discards all scheduled actions and resets time to 1. Useful if the `DebugContextCoordinator` is to be reused.
 	public func reset() {
 		internalTime = 1
-		queues = [:]
+		
+		// Since releasing `queues` will likely cause the release of closures and items held by the queue, which might lead to nested calls to remove items from `queues` violating ownership rules...
+		// We copy queues to a non-shared stack location, clear `queues` and *then* release the contents.
+		withExtendedLifetime(queues) { queues = [:] }
 	}
 	
 	func getOrCreateQueue(forName: DebugContextThread) -> DebugContextQueue {
@@ -166,12 +178,16 @@ public class DebugContextCoordinator {
 			return t
 		}
 		let t = DebugContextQueue()
-		queues[forName] = t
+
+		// Since releasing `queues` will likely cause the release of closures and items held by the queue, which might lead to nested calls to remove items from `queues` violating ownership rules...
+		// We copy queues to a non-shared stack location, clear `queues` and *then* release the contents.
+		withExtendedLifetime(queues[forName]) { queues[forName] = t }
+
 		return t
 	}
 	
 	// Fundamental method for scheduling a block on the coordinator for later invocation.
-	func schedule(block: @escaping () -> Void, thread: DebugContextThread, timeInterval interval: Int, repeats: Bool) -> DebugContextTimer {
+	func schedule(block: @escaping () -> Void, thread: DebugContextThread, timeInterval interval: Int64, repeats: Bool) -> DebugContextTimer {
 		let i = interval > 0 ? UInt64(interval) : 0 as UInt64
 		let debugContextTimer = DebugContextTimer(thread: thread, rescheduleInterval: repeats ? i : nil, coordinator: self)
 		getOrCreateQueue(forName: thread).schedule(pending: PendingBlock(time: internalTime + i, timer: debugContextTimer, block: block))
@@ -323,7 +339,7 @@ public struct DebugContext: ExecutionContext {
 	
 	/// Run `execute` asynchronously on the execution context
 	public func invokeAsync(_ execute: @escaping () -> Void) {
-		_ = coordinator?.schedule(block: execute, thread: thread, timeInterval: 0, repeats: false)
+		_ = coordinator?.schedule(block: execute, thread: thread, timeInterval: 1, repeats: false)
 	}
 	
 	/// Run `execute` on the execution context but don't return from this function until the provided function is complete.
@@ -338,7 +354,7 @@ public struct DebugContext: ExecutionContext {
 		case .immediate, .conditionallyAsync(false):
 			execute()
 		default:
-			c.runScheduledTasks(stoppingAfter: c.schedule(block: execute, thread: thread, timeInterval: 0, repeats: false))
+			c.runScheduledTasks(stoppingAfter: c.schedule(block: execute, thread: thread, timeInterval: 1, repeats: false))
 		}
 	}
 

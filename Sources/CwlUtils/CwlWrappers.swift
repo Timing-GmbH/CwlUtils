@@ -60,10 +60,10 @@ public final class AtomicBox<T> {
 	}
 
 	@discardableResult
-	public func mutate(_ f: (inout T) -> Void) -> T {
+	public func mutate(_ f: (inout T) throws -> Void) rethrows -> T {
 		mutex.unbalancedLock()
 		defer { mutex.unbalancedUnlock() }
-		f(&internalValue)
+		try f(&internalValue)
 		return internalValue
 	}
 }

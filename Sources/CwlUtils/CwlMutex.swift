@@ -18,7 +18,11 @@
 //  IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 //
 
-import Foundation
+#if os(Linux)
+	import Glibc
+#else
+	import Darwin
+#endif
 
 /// A basic mutex protocol that requires nothing more than "performing work inside the mutex".
 public protocol ScopedMutex {
@@ -90,13 +94,14 @@ public final class PThreadMutex: RawMutex {
 		}
 		switch type {
 		case .normal:
-			pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_NORMAL)
+			pthread_mutexattr_settype(&attr, Int32(PTHREAD_MUTEX_NORMAL))
 		case .recursive:
-			pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE)
+			pthread_mutexattr_settype(&attr, Int32(PTHREAD_MUTEX_RECURSIVE))
 		}
 		guard pthread_mutex_init(&unsafeMutex, &attr) == 0 else {
 			preconditionFailure()
 		}
+		pthread_mutexattr_destroy(&attr)
 	}
 	
 	deinit {
@@ -118,7 +123,7 @@ public final class PThreadMutex: RawMutex {
 
 /// A basic wrapper around `os_unfair_lock` (a non-FIFO, high performance lock that offers safety against priority inversion). This type is a "class" type to prevent accidental copying of the `os_unfair_lock`.
 /// NOTE: due to the behavior of the lock (non-FIFO) a single thread might drop and reacquire the lock without giving waiting threads a chance to resume (leading to potential starvation of waiters). For this reason, it is only recommended in situations where contention is expected to be rare or the interaction between contenders is otherwise known.
-@available(OSX 10.12, iOS 10, *)
+@available(OSX 10.12, iOS 10, tvOS 10, *)
 public final class UnfairLock: RawMutex {
 	public typealias MutexPrimitive = os_unfair_lock
 	

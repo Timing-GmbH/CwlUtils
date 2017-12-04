@@ -30,7 +30,7 @@ public extension Error {
 	public func withUnanticipatedErrorRecoveryAttempter(file: String = #file, line: Int = #line) -> NSError {
 		// We want to preserve the "userInfo" dictionary, so we avoid "self as NSError" if we can (since it creates a new NSError that doesn't preserve the userInfo). Instead, we cast *via* NSObject.
 		let e = self as NSError
-		var userInfo: [AnyHashable: Any] = e.userInfo
+		var userInfo: [String: Any] = e.userInfo
 		
 		if userInfo[NSLocalizedDescriptionKey] == nil {
 			userInfo[NSLocalizedDescriptionKey] = String(describing: self)
@@ -114,8 +114,13 @@ open class UnanticipatedErrorRecoveryAttempter: NSObject {
 		switch optionIndex {
 		case copyDetailsButtonIndex:
 		#if os(macOS)
-			NSPasteboard.general().clearContents()
-			NSPasteboard.general().setString(extendedErrorInformation(error as NSError), forType:NSPasteboardTypeString)
+			#if swift(>=4)
+				NSPasteboard.general.clearContents()
+				NSPasteboard.general.setString(extendedErrorInformation(error as NSError), forType:NSPasteboard.PasteboardType.string)
+			#else
+				NSPasteboard.general().clearContents()
+				NSPasteboard.general().setString(extendedErrorInformation(error as NSError), forType:NSPasteboardTypeString)
+			#endif
 		#elseif os(iOS)
 			UIPasteboard.general.string = extendedErrorInformation(error as NSError)
 		#endif
