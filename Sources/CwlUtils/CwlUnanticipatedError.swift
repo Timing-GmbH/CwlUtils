@@ -33,7 +33,7 @@ public extension Error {
 		var userInfo: [String: Any] = e.userInfo
 		
 		if userInfo[NSLocalizedDescriptionKey] == nil {
-			userInfo[NSLocalizedDescriptionKey] = String(describing: self)
+			userInfo[NSLocalizedDescriptionKey] = "\(e.domain).\(self)"
 		}
 		
 		// Move any existing NSLocalizedRecoverySuggestionErrorKey to a new key (we want to replace it but don't want to lose potentially useful information)
