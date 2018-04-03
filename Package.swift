@@ -1,23 +1,31 @@
+// swift-tools-version:4.0
 import PackageDescription
 
 let package = Package(
 	name: "CwlUtils",
-	targets: [
-		Target(name: "CwlUtils", dependencies: ["CwlFrameAddress", "ReferenceRandomGenerators"]),
-		Target(name: "CwlFrameAddress"),
-		Target(name: "CwlUtilsConcat"),
-		Target(name: "ReferenceRandomGenerators")
+   products: [
+   	.library(name: "CwlUtils", type: .dynamic, targets: ["CwlUtils"]),
 	],
 	dependencies: [
-		.Package(url: "https://github.com/mattgallagher/CwlPreconditionTesting.git", Version(1, 1, 0, prereleaseIdentifiers: ["beta", "12"])),
+		.package(url: "https://github.com/mattgallagher/CwlPreconditionTesting.git", .revision("cb7ab89273cfd0725a7a2f865cc6fc560a9b9083")),
 	],
-	exclude: [
-		"Sources/CwlUtils_iOSHarness",
-		"Sources/CwlUtils_macOSHarness",
-		"Tests/CwlUtils_macOSTestApp",
-		"Tests/CwlUtils_macOSTestAppUITests",
-		"Tests/CwlUtils_iOSTestApp",
-		"Tests/CwlUtils_iOSTestAppUITests",
-		"Tests/CwlUtilsPerformanceTests"
+	targets: [
+		.target(
+			name: "CwlUtils",
+			dependencies: [
+				.target(name: "CwlFrameAddress"),
+				.target(name: "ReferenceRandomGenerators")
+			]
+		),
+		.testTarget(
+			name: "CwlUtilsTests",
+			dependencies: [
+				.target(name: "CwlUtils"),
+				.product(name: "CwlPreconditionTesting")
+			]
+		),
+		.target(name: "CwlFrameAddress"),
+		.target(name: "CwlUtilsConcat"),
+		.target(name: "ReferenceRandomGenerators")
 	]
 )
