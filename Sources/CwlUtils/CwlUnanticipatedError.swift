@@ -44,7 +44,7 @@ public extension Error {
 		// Attach a new NSLocalizedRecoverySuggestionErrorKey and our recovery attempter and options
 		let directory = ((file as NSString).deletingLastPathComponent as NSString).lastPathComponent
 		let filename = (file as NSString).lastPathComponent
-		let suggestion = String(format: NSLocalizedString("The error occurred at line %ld of the %@/%@ file in the program's code.\n\nWhen reporting this error (e.g. by email to support@timingapp.com), please make sure to attach the contents of the clipboard after pressing the \"Copy details\" button below.\n\nPlease also provide details on what you were doing when the error occurred.",  comment: ""), line, directory, filename)
+		let suggestion = String(format: NSLocalizedString("The error occurred at line %ld of the %@/%@ file in the program's code.\n\nWhen reporting this error (e.g. via https://timingapp.com/contact), please make sure to attach the contents of the clipboard after pressing the \"Copy details\" button below.\n\nPlease also provide details on what you were doing when the error occurred.",  comment: ""), line, directory, filename)
 		userInfo[NSLocalizedRecoverySuggestionErrorKey] = suggestion
 		userInfo[NSLocalizedRecoveryOptionsErrorKey] = UnanticipatedErrorRecoveryAttempter.localizedRecoveryOptions()
 		userInfo[NSRecoveryAttempterErrorKey] = UnanticipatedErrorRecoveryAttempter()
