@@ -25,6 +25,13 @@ import UIKit
 import MobileCoreServices
 #endif
 
+public protocol ErrorRecoveryAttempter: class {
+	func localizedRecoveryOptions() -> [String]
+	func makeRecoverySuggestion(directory: String, filename: String, line: Int) -> String
+}
+
+public var defaultErrorRecoveryAttempter: ErrorRecoveryAttempter = UnanticipatedErrorRecoveryAttempter()
+
 public extension Error {
 	/// Return an NSError with the same properties as this error but with an `UnanticipatedErrorRecoveryAttempter` attached.
 	public func withUnanticipatedErrorRecoveryAttempter(file: String = #file, line: Int = #line) -> NSError {
@@ -44,10 +51,9 @@ public extension Error {
 		// Attach a new NSLocalizedRecoverySuggestionErrorKey and our recovery attempter and options
 		let directory = ((file as NSString).deletingLastPathComponent as NSString).lastPathComponent
 		let filename = (file as NSString).lastPathComponent
-		let suggestion = String(format: NSLocalizedString("The error occurred at line %ld of the %@/%@ file in the program's code.\n\nWhen reporting this error (e.g. via https://timingapp.com/contact), please make sure to attach the contents of the clipboard after pressing the \"Copy details\" button below.\n\nPlease also provide details on what you were doing when the error occurred.",  comment: ""), line, directory, filename)
-		userInfo[NSLocalizedRecoverySuggestionErrorKey] = suggestion
-		userInfo[NSLocalizedRecoveryOptionsErrorKey] = UnanticipatedErrorRecoveryAttempter.localizedRecoveryOptions()
-		userInfo[NSRecoveryAttempterErrorKey] = UnanticipatedErrorRecoveryAttempter()
+		userInfo[NSLocalizedRecoverySuggestionErrorKey] = defaultErrorRecoveryAttempter.makeRecoverySuggestion(directory: directory, filename: filename, line: line)
+		userInfo[NSLocalizedRecoveryOptionsErrorKey] = defaultErrorRecoveryAttempter.localizedRecoveryOptions()
+		userInfo[NSRecoveryAttempterErrorKey] = defaultErrorRecoveryAttempter
 
 		// Attach the call stack
 		userInfo[UnanticipatedErrorRecoveryAttempter.ReturnAddressesKey] = callStackReturnAddresses()
@@ -66,7 +72,7 @@ public func rethrowUnanticipated<T>(file: String = #file, line: Int = #line, f: 
 }
 
 /// Class usable as the NSRecoveryAttempterErrorKey object in an NSError that presents the 'Unexpected' error and gives the option of copying the full error to the pasteboard.
-open class UnanticipatedErrorRecoveryAttempter: NSObject {
+open class UnanticipatedErrorRecoveryAttempter: NSObject, ErrorRecoveryAttempter {
 	/// Key used in NSError.userInfo dictionaries to store call stack addresses
 	public static let ReturnAddressesKey = "CwlUtils.CallStackReturnAddresses"
 
@@ -74,8 +80,12 @@ open class UnanticipatedErrorRecoveryAttempter: NSObject {
 	public static let PreviousRecoverySuggestionKey = "CwlUtils.PreviousRecoverySuggestion"
 
 	/// Present two buttons: "Copy details" and "OK"
-	public class func localizedRecoveryOptions() -> [String] {
+	open func localizedRecoveryOptions() -> [String] {
 		return [NSLocalizedString("OK", comment:""), NSLocalizedString("Copy details", comment:"")]
+	}
+	
+	open func makeRecoverySuggestion(directory: String, filename: String, line: Int) -> String {
+		return String(format: NSLocalizedString("The error occurred at line %ld of the %@/%@ file in the program's code.\n\nWhen reporting this error (e.g. via https://timingapp.com/contact), please make sure to attach the contents of the clipboard after pressing the \"Copy details\" button below.\n\nPlease also provide details on what you were doing when the error occurred.",  comment: ""), line, directory, filename)
 	}
 	
 	/// There are two possible `attemptRecoveryFromError` methods. This one just feeds into the other.
