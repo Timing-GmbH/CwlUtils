@@ -31,22 +31,19 @@ import Foundation
 //  1. If the deferred work calls back into the mutex, it must be able to ensure that it is still relevant (hasn't been superceded by an action that may have occurred between the end of the mutex and the performing of the `DeferredWork`. This may involve a token (inside the mutex, only the most recent token is accepted) or the mutex queueing further requests until the most recent `DeferredWork` completes.
 //  2. The `runWork` must be manually invoked. Automtic invocation (e.g in the `deinit` of a lifetime managed `class` instance) would add heap allocation overhead and would also be easy to accidentally release at the wrong point (inside the mutex) causing erratic problems. Instead, the `runWork` is guarded with a `DEBUG`-only `OnDelete` check that ensures that the `runWork` has been correctly invoked by the time the `DeferredWork` falls out of scope.
 public struct DeferredWork {
-	enum PossibleWork {
-	case none
-	case single(() -> Void)
-	case multiple(ContiguousArray<() -> Void>)
-	}
+	typealias PossibleWork = Few<() -> Void>
 	
 	var work: PossibleWork
 
-#if CHECK_DEFERRED_WORK
-	let invokeCheck: OnDelete = { () -> OnDelete in
-		var sourceStack = callStackReturnAddresses(skip: 2)
-		return OnDelete {
-			preconditionFailure("Failed to perform work deferred at location:\n" + symbolsForCallStack(addresses: sourceStack).joined(separator: "\n"))
-		}
-	}()
-#endif
+	#if DEBUG
+		let invokeCheck: OnDelete = { () -> OnDelete in
+			var sourceStack = Thread.callStackReturnAddresses
+			return OnDelete {
+				let symbols = symbolsForCallStack(addresses: sourceStack.map { $0.uintValue })
+				preconditionFailure("Failed to perform work deferred at location:\n" + symbols.joined(separator: "\n"))
+			}
+		}()
+	#endif
 
 	public init() {
 		work = .none
@@ -57,51 +54,54 @@ public struct DeferredWork {
 	}
 	
 	public mutating func append(_ other: DeferredWork) {
-#if CHECK_DEFERRED_WORK
-		precondition(invokeCheck.isValid && other.invokeCheck.isValid, "Work appended to an already cancelled/invoked DeferredWork")
-		other.invokeCheck.invalidate()
-#endif
+		#if DEBUG
+			precondition(invokeCheck.isValid && other.invokeCheck.isValid, "Work appended to an already cancelled/invoked DeferredWork")
+				other.invokeCheck.invalidate()
+		#endif
+		
 		switch other.work {
 		case .none: break
 		case .single(let otherWork): self.append(otherWork)
-		case .multiple(let otherWork):
+		case .array(let otherWork):
 			switch work {
-			case .none: work = .multiple(otherWork)
+			case .none: work = .array(otherWork)
 			case .single(let existing):
-				var newWork: ContiguousArray<() -> Void> = [existing]
+				var newWork: Array<() -> Void> = [existing]
 				newWork.append(contentsOf: otherWork)
-				work = .multiple(newWork)
-			case .multiple(var existing):
+				work = .array(newWork)
+			case .array(var existing):
 				work = .none
 				existing.append(contentsOf: otherWork)
-				work = .multiple(existing)
+				work = .array(existing)
 			}
 		}
 	}
 	
 	public mutating func append(_ additionalWork: @escaping () -> Void) {
-#if CHECK_DEFERRED_WORK
-		precondition(invokeCheck.isValid, "Work appended to an already cancelled/invoked DeferredWork")
-#endif
+		#if DEBUG
+			precondition(invokeCheck.isValid, "Work appended to an already cancelled/invoked DeferredWork")
+		#endif
+		
 		switch work {
 		case .none: work = .single(additionalWork)
-		case .single(let existing): work = .multiple([existing, additionalWork])
-		case .multiple(var existing):
+		case .single(let existing): work = .array([existing, additionalWork])
+		case .array(var existing):
 			work = .none
 			existing.append(additionalWork)
-			work = .multiple(existing)
+			work = .array(existing)
 		}
 	}
 	
 	public mutating func runWork() {
-#if CHECK_DEFERRED_WORK
-		precondition(invokeCheck.isValid, "Work run multiple times")
-		invokeCheck.invalidate()
-#endif
+		#if DEBUG
+			precondition(invokeCheck.isValid, "Work run multiple times")
+			invokeCheck.invalidate()
+		#endif
+		
 		switch work {
 		case .none: break
 		case .single(let w): w()
-		case .multiple(let ws):
+		case .array(let ws):
 			for w in ws {
 				w()
 			}

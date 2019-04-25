@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Scheme
-   LastUpgradeVersion = "1000"
+   LastUpgradeVersion = "1010"
    version = "1.3">
    <BuildAction
       parallelizeBuildables = "YES"
@@ -16,7 +16,7 @@
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "C95BDE9A1E41688B00AAA64B"
                BuildableName = "CwlUtils.framework"
-               BlueprintName = "CwlUtils_iOS"
+               BlueprintName = "CwlUtils"
                ReferencedContainer = "container:CwlUtils.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -32,9 +32,9 @@
             skipped = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "C95BDEB81E4168B800AAA64B"
-               BuildableName = "CwlUtils_iOSTests.xctest"
-               BlueprintName = "CwlUtils_iOSTests"
+               BlueprintIdentifier = "OBJ_198"
+               BuildableName = "CwlUtils_macOSTests.xctest"
+               BlueprintName = "CwlUtils_macOSTests"
                ReferencedContainer = "container:CwlUtils.xcodeproj">
             </BuildableReference>
          </TestableReference>
@@ -44,7 +44,7 @@
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "C95BDE9A1E41688B00AAA64B"
             BuildableName = "CwlUtils.framework"
-            BlueprintName = "CwlUtils_iOS"
+            BlueprintName = "CwlUtils"
             ReferencedContainer = "container:CwlUtils.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
@@ -66,7 +66,7 @@
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "C95BDE9A1E41688B00AAA64B"
             BuildableName = "CwlUtils.framework"
-            BlueprintName = "CwlUtils_iOS"
+            BlueprintName = "CwlUtils"
             ReferencedContainer = "container:CwlUtils.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
@@ -84,7 +84,7 @@
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "C95BDE9A1E41688B00AAA64B"
             BuildableName = "CwlUtils.framework"
-            BlueprintName = "CwlUtils_iOS"
+            BlueprintName = "CwlUtils"
             ReferencedContainer = "container:CwlUtils.xcodeproj">
          </BuildableReference>
       </MacroExpansion>

@@ -31,24 +31,13 @@ public enum DebugContextThread: Hashable {
 	case main
 	case global
 	case custom(String)
-
+	
 	/// Convenience test to determine if an `Exec` instance wraps a `DebugContext` identifying `self` as its `thread`.
 	public func matches(_ exec: Exec) -> Bool {
-		if case .custom(let debugContext as DebugContext) = exec, debugContext.thread ==
-			self {
+		if case .custom(let debugContext as DebugContext) = exec, debugContext.thread == self {
 			return true
 		} else {
 			return false
-		}
-	}
-	
-	/// Implementation of Hashable property
-	public var hashValue: Int {
-		switch self {
-		case .unspecified: return Int(0).hashValue
-		case .main: return Int(1).hashValue
-		case .global: return Int(2).hashValue
-		case .custom(let s): return Int(3).hashValue ^ s.hashValue
 		}
 	}
 }
@@ -100,12 +89,12 @@ public class DebugContextCoordinator {
 	
 	/// Implementation mimicking Exec.main but returning an Exec.custom(DebugContext)
 	public var main: Exec {
-		return .custom(DebugContext(type: .conditionallyAsync(true), thread: .main, coordinator: self))
+		return .custom(DebugContext(type: .thread { [weak self] in self?.currentThread == .main }, thread: .main, coordinator: self))
 	}
 	
 	/// Implementation mimicking Exec.mainAsync but returning an Exec.custom(DebugContext)
 	public var mainAsync: Exec {
-		return .custom(DebugContext(type: .serialAsync, thread: .main, coordinator: self))
+		return .custom(DebugContext(type: .threadAsync { [weak self] in self?.currentThread == .main }, thread: .main, coordinator: self))
 	}
 	
 	/// Implementation mimicking Exec.default but returning an Exec.custom(DebugContext)
@@ -114,21 +103,21 @@ public class DebugContextCoordinator {
 	}
 	
 	/// Implementation mimicking Exec.syncQueue but returning an Exec.custom(DebugContext)
-	public var syncQueue: Exec {
+	public func syncQueue() -> Exec {
 		let uuidString = CFUUIDCreateString(nil, CFUUIDCreate(nil)) as String? ?? ""
 		return .custom(DebugContext(type: .mutex, thread: .custom(uuidString), coordinator: self))
 	}
 	
 	/// Implementation mimicking Exec.asyncQueue but returning an Exec.custom(DebugContext)
-	public var asyncQueue: Exec {
+	public func asyncQueue() -> Exec {
 		let uuidString = CFUUIDCreateString(nil, CFUUIDCreate(nil)) as String? ?? ""
 		return .custom(DebugContext(type: .serialAsync, thread: .custom(uuidString), coordinator: self))
 	}
 	
 	/// Performs all scheduled actions in a serial loop.
 	///
-	/// - parameter stoppingAfter: If nil, loop will continue until `stop` invoked or until no actions remain. If non-nil, loop will abort after an action matching Cancellable is completed.
-	public func runScheduledTasks(stoppingAfter: (AnyObject & Cancellable)? = nil) {
+	/// - parameter stoppingAfter: If nil, loop will continue until `stop` invoked or until no actions remain. If non-nil, loop will abort after an action matching Lifetime is completed.
+	public func runScheduledTasks(stoppingAfter: (AnyObject & Lifetime)? = nil) {
 		stopRequested = false
 		currentThread = .unspecified
 		while !stopRequested, let nextTimer = runNextTask() {
@@ -145,7 +134,7 @@ public class DebugContextCoordinator {
 	
 	/// Performs all scheduled actions in a serial loop.
 	///
-	/// - parameter stoppingAfter: If nil, loop will continue until `stop` invoked or until no actions remain. If non-nil, loop will abort after an action matching Cancellable is completed.
+	/// - parameter stoppingAfter: If nil, loop will continue until `stop` invoked or until no actions remain. If non-nil, loop will abort after an action matching Lifetime is completed.
 	public func runScheduledTasks(untilTime: UInt64) {
 		stopRequested = false
 		currentThread = .unspecified
@@ -178,11 +167,11 @@ public class DebugContextCoordinator {
 			return t
 		}
 		let t = DebugContextQueue()
-
+		
 		// Since releasing `queues` will likely cause the release of closures and items held by the queue, which might lead to nested calls to remove items from `queues` violating ownership rules...
 		// We copy queues to a non-shared stack location, clear `queues` and *then* release the contents.
 		withExtendedLifetime(queues[forName]) { queues[forName] = t }
-
+		
 		return t
 	}
 	
@@ -269,10 +258,10 @@ class DebugContextQueue {
 		
 		pendingBlocks.insert(pending, at: insertionIndex)
 	}
-
+	
 	// Remove a block
 	func cancelTimer(_ toCancel: DebugContextTimer) {
-		if let index = pendingBlocks.index(where: { tuple -> Bool in tuple.timer === toCancel }) {
+		if let index = pendingBlocks.firstIndex(where: { tuple -> Bool in tuple.timer === toCancel }) {
 			pendingBlocks.remove(at: index)
 		}
 	}
@@ -300,40 +289,31 @@ class DebugContextQueue {
 }
 
 /// An implementation of `ExecutionContext` that schedules its non-immediate actions on a `DebugContextCoordinator`. This type is constructed using the `Exec` mimicking properties and functions on `DebugContextCoordinator`.
-public struct DebugContext: ExecutionContext {
-	let underlyingType: ExecutionType
-	let thread: DebugContextThread
+public struct DebugContext: CustomExecutionContext {
+	public let type: ExecutionType
+	public let thread: DebugContextThread
 	weak var coordinator: DebugContextCoordinator?
-
+	
 	init(type: ExecutionType, thread: DebugContextThread, coordinator: DebugContextCoordinator) {
-		self.underlyingType = type
+		self.type = type
 		self.thread = thread
 		self.coordinator = coordinator
-	}
-	
-	/// A description about how functions will be invoked on an execution context.
-	public var type: ExecutionType {
-		switch underlyingType {
-		case .conditionallyAsync:
-			if let ctn = coordinator?.currentThread, thread == ctn {
-				return .conditionallyAsync(false)
-			}
-			fallthrough
-		default: return underlyingType
-		}
 	}
 	
 	/// Run `execute` normally on the execution context
 	public func invoke(_ execute: @escaping () -> Void) {
 		guard let c = coordinator else { return }
-		switch type {
-		case .mutex:
+		if type.isImmediateInCurrentContext {
 			let previousThread = c.currentThread
-			c.currentThread = thread
+			if !type.isConcurrent {
+				c.currentThread = thread
+			}
 			execute()
-			c.currentThread = previousThread
-		case .immediate, .conditionallyAsync(false): execute()
-		default: invokeAsync(execute)
+			if !type.isConcurrent {
+				c.currentThread = previousThread
+			}
+		} else {
+			invokeAsync(execute)
 		}
 	}
 	
@@ -342,44 +322,74 @@ public struct DebugContext: ExecutionContext {
 		_ = coordinator?.schedule(block: execute, thread: thread, timeInterval: 1, repeats: false)
 	}
 	
-	/// Run `execute` on the execution context but don't return from this function until the provided function is complete.
+	@available(*, deprecated, message: "Use invokeSync instead")
 	public func invokeAndWait(_ execute: @escaping () -> Void) {
-		guard let c = coordinator else { return }
-		switch type {
-		case .mutex:
-			let previousThread = c.currentThread
-			c.currentThread = thread
-			execute()
-			c.currentThread = previousThread
-		case .immediate, .conditionallyAsync(false):
-			execute()
-		default:
-			c.runScheduledTasks(stoppingAfter: c.schedule(block: execute, thread: thread, timeInterval: 1, repeats: false))
-		}
-	}
-
-	/// Run `execute` on the execution context after `interval` (plus `leeway`) unless the returned `Cancellable` is cancelled or released before running occurs.
-	public func singleTimer(interval: DispatchTimeInterval, leeway: DispatchTimeInterval, handler: @escaping () -> Void) -> Cancellable {
-		guard let c = coordinator else { return DebugContextTimer() }
-		return c.schedule(block: handler, thread: thread, timeInterval: interval.toNanoseconds(), repeats: false)
-	}
-
-	/// Run `execute` on the execution context after `interval` (plus `leeway`), passing the `parameter` value as an argument, unless the returned `Cancellable` is cancelled or released before running occurs.
-	public func singleTimer<T>(parameter: T, interval: DispatchTimeInterval, leeway: DispatchTimeInterval, handler: @escaping (T) -> Void) -> Cancellable {
-		guard let c = coordinator else { return DebugContextTimer() }
-		return c.schedule(block: { handler(parameter) }, thread: thread, timeInterval: interval.toNanoseconds(), repeats: false)
+		_ = invokeSync(execute)
 	}
 	
-	/// Run `execute` on the execution context after `interval` (plus `leeway`), and again every `interval` (within a `leeway` margin of error) unless the returned `Cancellable` is cancelled or released before running occurs.
-	public func periodicTimer(interval: DispatchTimeInterval, leeway: DispatchTimeInterval, handler: @escaping () -> Void) -> Cancellable {
-		guard let c = coordinator else { return DebugContextTimer() }
-		return c.schedule(block: handler, thread: thread, timeInterval: interval.toNanoseconds(), repeats: true)
+	/// Run `execute` on the execution context but don't return from this function until the provided function is complete.
+	///
+	/// If the debug coordinator is nil or has completed before this block is run, the block will be directly invoked instead of running in the debug context.
+	/// In general this shouldn't matter since the debug context is generally just a synchronous invocation.
+	///
+	/// - Parameter execute: the block to run
+	/// - Returns: the return value from running the block
+	public func invokeSync<Return>(_ execute: () throws -> Return) rethrows -> Return {
+		guard let c = coordinator else {
+			return try execute()
+		}
+		if type.isImmediateInCurrentContext {
+			let previousThread = c.currentThread
+			if !type.isConcurrent {
+				c.currentThread = thread
+			}
+			let r = try execute()
+			if !type.isConcurrent {
+				c.currentThread = previousThread
+			}
+			return r
+		} else {
+			let result = try withoutActuallyEscaping(execute) { ex throws -> Return? in
+				var rr: Result<Return, Error>? = nil
+				c.runScheduledTasks(stoppingAfter: c.schedule(block: {
+					rr = Result { try ex() }
+				}, thread: thread, timeInterval: 1, repeats: false))
+				return try rr?.get()
+			}
+			guard let r = result else { return try execute() }
+			return r
+		}
 	}
-
-	/// Run `execute` on the execution context after `interval` (plus `leeway`), passing the `parameter` value as an argument, and again every `interval` (within a `leeway` margin of error) unless the returned `Cancellable` is cancelled or released before running occurs.
-	public func periodicTimer<T>(parameter: T, interval: DispatchTimeInterval, leeway: DispatchTimeInterval, handler: @escaping (T) -> Void) -> Cancellable {
+	
+	public func relativeAsync(qos: DispatchQoS.QoSClass?) -> Exec {
+		guard let c = coordinator else {
+			return Exec.direct
+		}
+		return c.global
+	}
+	
+	/// Run `execute` on the execution context after `interval` (plus `leeway`) unless the returned `Lifetime` is cancelled or released before running occurs.
+	public func singleTimer(interval: DispatchTimeInterval, leeway: DispatchTimeInterval, handler: @escaping () -> Void) -> Lifetime {
 		guard let c = coordinator else { return DebugContextTimer() }
-		return c.schedule(block: { handler(parameter) }, thread: thread, timeInterval: interval.toNanoseconds(), repeats: true)
+		return c.schedule(block: handler, thread: thread, timeInterval: interval.nanoseconds, repeats: false)
+	}
+	
+	/// Run `execute` on the execution context after `interval` (plus `leeway`), passing the `parameter` value as an argument, unless the returned `Lifetime` is cancelled or released before running occurs.
+	public func singleTimer<T>(parameter: T, interval: DispatchTimeInterval, leeway: DispatchTimeInterval, handler: @escaping (T) -> Void) -> Lifetime {
+		guard let c = coordinator else { return DebugContextTimer() }
+		return c.schedule(block: { handler(parameter) }, thread: thread, timeInterval: interval.nanoseconds, repeats: false)
+	}
+	
+	/// Run `execute` on the execution context after `interval` (plus `leeway`), and again every `interval` (within a `leeway` margin of error) unless the returned `Lifetime` is cancelled or released before running occurs.
+	public func periodicTimer(interval: DispatchTimeInterval, leeway: DispatchTimeInterval, handler: @escaping () -> Void) -> Lifetime {
+		guard let c = coordinator else { return DebugContextTimer() }
+		return c.schedule(block: handler, thread: thread, timeInterval: interval.nanoseconds, repeats: true)
+	}
+	
+	/// Run `execute` on the execution context after `interval` (plus `leeway`), passing the `parameter` value as an argument, and again every `interval` (within a `leeway` margin of error) unless the returned `Lifetime` is cancelled or released before running occurs.
+	public func periodicTimer<T>(parameter: T, interval: DispatchTimeInterval, leeway: DispatchTimeInterval, handler: @escaping (T) -> Void) -> Lifetime {
+		guard let c = coordinator else { return DebugContextTimer() }
+		return c.schedule(block: { handler(parameter) }, thread: thread, timeInterval: interval.nanoseconds, repeats: true)
 	}
 	
 	/// Gets a timestamp representing the host uptime the in the current context
@@ -390,7 +400,7 @@ public struct DebugContext: ExecutionContext {
 }
 
 // All actions scheduled with a `DebugContextCoordinator` are referenced by a DebugContextTimer (even those actions that are simply asynchronous invocations without a delay).
-class DebugContextTimer: Cancellable {
+class DebugContextTimer: Lifetime {
 	let thread: DebugContextThread
 	let rescheduleInterval: UInt64?
 	weak var coordinator: DebugContextCoordinator?
@@ -407,7 +417,7 @@ class DebugContextTimer: Cancellable {
 		self.rescheduleInterval = rescheduleInterval
 	}
 	
-	/// Cancellable implementation
+	/// Lifetime implementation
 	public func cancel() {
 		coordinator?.cancelTimer(self)
 		coordinator = nil

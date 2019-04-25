@@ -28,6 +28,8 @@ enum TestCode: Int, Error {
 	case testValue = 2
 }
 
+#if os(iOS) || os(macOS)
+
 class UnanticipatedErrorTests: XCTestCase {
 	func testUnanticipatedError() {
 		let e = TestCode.testValue.withUnanticipatedErrorRecoveryAttempter()
@@ -36,7 +38,7 @@ class UnanticipatedErrorTests: XCTestCase {
 		XCTAssert(e.code == TestCode.testValue.rawValue)
 		
 		let userInfo = e.userInfo
-		if let callStackSymbols = userInfo[UnanticipatedErrorRecoveryAttempter.ReturnAddressesKey] as? [UInt] {
+		if let callStackSymbols = userInfo[UnanticipatedErrorRecoveryAttempter.callStackSymbols] as? [String] {
 			XCTAssert(callStackSymbols.count > 1, "No call stack symbols present")
 		} else {
 			XCTFail("Call stack symbols not present")
@@ -60,6 +62,8 @@ class UnanticipatedErrorTests: XCTestCase {
 	}
 }
 
+#endif
+
 #if os(iOS)
 	
 	func pasteboardBackup() -> [Dictionary<String, NSObject>] {
@@ -74,7 +78,7 @@ class UnanticipatedErrorTests: XCTestCase {
 		return UIPasteboard.general.string
 	}
 	
-#else
+#elseif os(macOS)
 	
 	func pasteboardBackup() -> [NSPasteboardItem] {
 		#if swift(>=4)

@@ -5,22 +5,28 @@
 //  Created by Matt Gallagher on 2016/06/16.
 //  Copyright © 2016 Matt Gallagher ( https://www.cocoawithlove.com ). All rights reserved.
 //
+//  Permission to use, copy, modify, and/or distribute this software for any purpose with or without
+//  fee is hereby granted, provided that the above copyright notice and this permission notice
+//  appear in all copies.
+//
+//  THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS
+//  SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE
+//  AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+//  WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT,
+//  NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
+//  OF THIS SOFTWARE.
+//
 
 import Foundation
 import CwlUtils
 import XCTest
 
 private extension PThreadMutex {
-	func fastsync<R>(f: () throws -> R) rethrows -> R {
-		pthread_mutex_lock(&unsafeMutex)
-		defer { pthread_mutex_unlock(&unsafeMutex) }
+	func sync_same_file<R>(f: () throws -> R) rethrows -> R {
+		pthread_mutex_lock(&underlyingMutex)
+		defer { pthread_mutex_unlock(&underlyingMutex) }
 		return try f()
 	}
-}
-private func fastsync<R>(_ mutex: PThreadMutex, f: () throws -> R) rethrows -> R {
-	pthread_mutex_lock(&mutex.unsafeMutex)
-	defer { pthread_mutex_unlock(&mutex.unsafeMutex) }
-	return try f()
 }
 
 public struct DispatchSemaphoreWrapper {
@@ -46,44 +52,7 @@ class TestClass {
 
 class MutexPerformanceTests: XCTestCase {
 	
-	func testPThreadSync2Performance() {
-		let mutex = PThreadMutex()
-		measure { () -> Void in
-			var total = 0
-			for _ in 0..<iterations {
-				mutex.sync_2(&total) { (t: inout Int) -> Void in
-					t += 1
-				}
-			}
-			XCTAssert(total == iterations)
-		}
-	}
-	
-	func testDispatchCurriedSelfMethodPerformance() {
-		let queue = DispatchQueue(label: "")
-		measure { () -> Void in
-			let test = TestClass()
-			for _ in 0..<iterations {
-				queue.sync(execute: test.increment)
-			}
-			XCTAssert(test.testVariable == iterations)
-		}
-	}
-	
-	func testFreeFunctionWrappingPThreadPerformance() {
-		let mutex = PThreadMutex()
-		measure { () -> Void in
-			var total = 0
-			for _ in 0..<iterations {
-				fastsync(mutex) {
-					total += 1
-				}
-			}
-			XCTAssert(total == iterations)
-		}
-	}
-	
-	func testPThreadSyncPerformance() {
+	func testPThreadSyncCapturingClosurePerformance() {
 		let mutex = PThreadMutex()
 		measure { () -> Void in
 			var total = 0
@@ -96,12 +65,12 @@ class MutexPerformanceTests: XCTestCase {
 		}
 	}
 	
-	func testPThreadSync3Performance() {
+	func testPThreadSyncGenericParamPerformance() {
 		let mutex = PThreadMutex()
 		measure { () -> Void in
 			var total = 0
 			for _ in 0..<iterations {
-				total = mutex.sync_3(&total) { t in
+				total = mutex.sync_generic_param(&total) { t in
 					return t + 1
 				}
 			}
@@ -109,14 +78,26 @@ class MutexPerformanceTests: XCTestCase {
 		}
 	}
 	
-	func testPThreadSync4Performance() {
+	func testDispatchSemaphorePerformance() {
+		let mutex = DispatchSemaphoreWrapper()
+		measure { () -> Void in
+			var total = 0
+			for _ in 0..<iterations {
+				total = mutex.sync {
+					return total + 1
+				}
+			}
+			XCTAssert(total == iterations)
+		}
+	}
+	
+	func testPThreadSyncSameFilePerformance() {
 		let mutex = PThreadMutex()
 		measure { () -> Void in
 			var total = 0
-			for i in 0..<iterations {
-				var j = i
-				mutex.sync_4(&j, &total) { (j: inout Int, t: inout Int) in
-					t = j + 1
+			for _ in 0..<iterations {
+				mutex.sync_same_file {
+					total += 1
 				}
 			}
 			XCTAssert(total == iterations)
@@ -136,27 +117,14 @@ class MutexPerformanceTests: XCTestCase {
 		}
 	}
 	
-	func testPThreadCopiedPerformance() {
-		let mutex = PThreadMutex()
-		measure { () -> Void in
-			var total = 0
-			for _ in 0..<iterations {
-				mutex.fastsync {
-					total += 1
-				}
-			}
-			XCTAssert(total == iterations)
-		}
-	}
-	
 	func testPThreadInlinePerformance() {
 		let mutex = PThreadMutex()
 		measure { () -> Void in
 			var total = 0
 			for _ in 0..<iterations {
-				pthread_mutex_lock(&mutex.unsafeMutex)
+				pthread_mutex_lock(&mutex.underlyingMutex)
 				total += 1
-				pthread_mutex_unlock(&mutex.unsafeMutex)
+				pthread_mutex_unlock(&mutex.underlyingMutex)
 			}
 			XCTAssert(total == iterations)
 		}
@@ -167,7 +135,7 @@ class MutexPerformanceTests: XCTestCase {
 		measure { () -> Void in
 			var total = 0
 			for _ in 0..<iterations {
-				queue.sync {
+				queue.sync(flags: []) {
 					total += 1
 				}
 			}
@@ -175,7 +143,7 @@ class MutexPerformanceTests: XCTestCase {
 		}
 	}
 	
-	func testSpinLockPerformance() {
+	func testSpinLockInlinePerformance() {
 		var lock = OS_SPINLOCK_INIT
 		measure { () -> Void in
 			var total = 0
@@ -189,7 +157,7 @@ class MutexPerformanceTests: XCTestCase {
 	}
 	
 	@available(OSX 10.12, *)
-	func testUnfairLockPerformance() {
+	func testUnfairLockInlinePerformance() {
 		var lock = os_unfair_lock()
 		measure { () -> Void in
 			var total = 0

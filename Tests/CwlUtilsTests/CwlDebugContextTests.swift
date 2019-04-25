@@ -52,7 +52,7 @@ class DebugContextTests: XCTestCase {
 	func testDirectInvokeAndWait() {
 		let coordinator = DebugContextCoordinator()
 		var checkpoint = false
-		coordinator.direct.invokeAndWait {
+		coordinator.direct.invokeSync {
 			checkpoint = true
 			
 			XCTAssert(coordinator.currentThread == .unspecified)
@@ -65,7 +65,7 @@ class DebugContextTests: XCTestCase {
 		let coordinator = DebugContextCoordinator()
 		var checkpoint1 = false
 		var checkpoint2 = false
-		var timer2: Cancellable? = nil
+		var timer2: Lifetime? = nil
 		let timer1 = coordinator.direct.singleTimer(interval: .seconds(10), leeway: .seconds(0)) {
 			checkpoint1 = true
 			
@@ -113,7 +113,7 @@ class DebugContextTests: XCTestCase {
 	func testDirectPeriodicTimer() {
 		let coordinator = DebugContextCoordinator()
 		var results = [(Int, UInt64)]()
-		var timer1: Cancellable? = nil
+		var timer1: Lifetime? = nil
 		timer1 = coordinator.direct.periodicTimer(interval: .seconds(3), leeway: .seconds(0)) {
 			results.append((0, coordinator.currentTime))
 			
@@ -121,7 +121,7 @@ class DebugContextTests: XCTestCase {
 				timer1?.cancel()
 			}
 		}
-		var timer2: Cancellable? = nil
+		var timer2: Lifetime? = nil
 		timer2 = coordinator.direct.periodicTimer(interval: .seconds(10), leeway: .seconds(0)) {
 			results.append((1, coordinator.currentTime))
 			
@@ -146,7 +146,7 @@ class DebugContextTests: XCTestCase {
 	func testDirectPeriodicTimerWithParameter() {
 		let coordinator = DebugContextCoordinator()
 		var results = [(Int, UInt64)]()
-		var timer1: Cancellable? = nil
+		var timer1: Lifetime? = nil
 		timer1 = coordinator.direct.periodicTimer(parameter: 23, interval: .seconds(3), leeway: .seconds(0)) { p in
 			XCTAssert(p == 23)
 			results.append((0, coordinator.currentTime))
@@ -155,7 +155,7 @@ class DebugContextTests: XCTestCase {
 				timer1?.cancel()
 			}
 		}
-		var timer2: Cancellable? = nil
+		var timer2: Lifetime? = nil
 		timer2 = coordinator.direct.periodicTimer(parameter: 45, interval: .seconds(10), leeway: .seconds(0)) { p in
 			XCTAssert(p == 45)
 			results.append((1, coordinator.currentTime))
@@ -235,7 +235,7 @@ class DebugContextTests: XCTestCase {
 	func testSyncQueueInvoke() {
 		let coordinator1 = DebugContextCoordinator()
 		var checkpoint1 = false
-		let ec = coordinator1.syncQueue
+		let ec = coordinator1.syncQueue()
 		
 		if case .custom(_ as DebugContext) = ec {
 			ec.invoke {
@@ -253,7 +253,7 @@ class DebugContextTests: XCTestCase {
 	func testAsyncQueueInvoke() {
 		let coordinator1 = DebugContextCoordinator()
 		var checkpoint1 = false
-		let ec = coordinator1.asyncQueue
+		let ec = coordinator1.asyncQueue()
 		if case .custom(_ as DebugContext) = ec {
 			ec.invoke {
 				checkpoint1 = true
@@ -326,7 +326,7 @@ class DebugContextTests: XCTestCase {
 	func testSyncQueueInvokeAsync() {
 		let coordinator1 = DebugContextCoordinator()
 		var checkpoint1 = false
-		let ec = coordinator1.syncQueue
+		let ec = coordinator1.syncQueue()
 		if case .custom(_ as DebugContext) = ec {
 			ec.invokeAsync {
 				checkpoint1 = true
@@ -345,7 +345,7 @@ class DebugContextTests: XCTestCase {
 	func testAsyncQueueInvokeAsync() {
 		let coordinator1 = DebugContextCoordinator()
 		var checkpoint1 = false
-		let ec = coordinator1.asyncQueue
+		let ec = coordinator1.asyncQueue()
 		if case .custom(_ as DebugContext) = ec {
 			ec.invokeAsync {
 				checkpoint1 = true
@@ -364,7 +364,7 @@ class DebugContextTests: XCTestCase {
 	func testMainInvokeAndWait() {
 		let coordinator1 = DebugContextCoordinator()
 		var checkpoint1 = false
-		coordinator1.main.invokeAndWait {
+		coordinator1.main.invokeSync {
 			checkpoint1 = true
 			
 			XCTAssert(coordinator1.currentThread == .main)
@@ -374,7 +374,7 @@ class DebugContextTests: XCTestCase {
 
 		let coordinator2 = DebugContextCoordinator()
 		var checkpoint2 = false
-		coordinator2.main.invokeAndWait {
+		coordinator2.main.invokeSync {
 			checkpoint2 = true
 			
 			XCTAssert(coordinator2.currentThread == .main)
@@ -386,7 +386,7 @@ class DebugContextTests: XCTestCase {
 	func testMainAsyncInvokeAndWait() {
 		let coordinator1 = DebugContextCoordinator()
 		var checkpoint1 = false
-		coordinator1.mainAsync.invokeAndWait {
+		coordinator1.mainAsync.invokeSync {
 			checkpoint1 = true
 			
 			XCTAssert(coordinator1.currentThread == .main)
@@ -398,7 +398,7 @@ class DebugContextTests: XCTestCase {
 	func testDefaultInvokeAndWait() {
 		let coordinator1 = DebugContextCoordinator()
 		var checkpoint1 = false
-		coordinator1.global.invokeAndWait {
+		coordinator1.global.invokeSync {
 			checkpoint1 = true
 			
 			XCTAssert(coordinator1.currentThread == .global)
@@ -407,12 +407,12 @@ class DebugContextTests: XCTestCase {
 		XCTAssert(checkpoint1)
 	}
 	
-	func testSyncQueueInvokeAndWait() {
+	func testSyncQueueInvokeSync() {
 		let coordinator1 = DebugContextCoordinator()
 		var checkpoint1 = false
-		let ec = coordinator1.syncQueue
+		let ec = coordinator1.syncQueue()
 		if case .custom(_ as DebugContext) = ec {
-			ec.invokeAndWait {
+			ec.invokeSync {
 				checkpoint1 = true
 				
 				XCTAssert(coordinator1.currentThread.matches(ec))
@@ -424,12 +424,12 @@ class DebugContextTests: XCTestCase {
 		}
 	}
 	
-	func testAsyncQueueInvokeAndWait() {
+	func testAsyncQueueInvokeSync() {
 		let coordinator1 = DebugContextCoordinator()
 		var checkpoint1 = false
-		let ec = coordinator1.asyncQueue
+		let ec = coordinator1.asyncQueue()
 		if case .custom(_ as DebugContext) = ec {
-			ec.invokeAndWait {
+			ec.invokeSync {
 				checkpoint1 = true
 				
 				XCTAssert(coordinator1.currentThread.matches(ec))
@@ -441,45 +441,83 @@ class DebugContextTests: XCTestCase {
 		}
 	}
 	
-	func testConnectSuccess() {
+	func testRelativeAsync() {
+		let coordinator1 = DebugContextCoordinator()
+		let async = coordinator1.asyncQueue()
+		
+		let relativeAsync = async.relativeAsync()
+		if case .custom(let relative as DebugContext) = relativeAsync, case .custom(let global as DebugContext) = coordinator1.global {
+			return XCTAssert(relative.thread == global.thread)
+		} else {
+			return XCTFail()
+		}
+	}
+
+	#if false
+		func testTimeoutServiceSuccessHostTime() {
+			let ex = expectation(description: "Waiting for timeout callback")
+			
+			// Use our debug `StringService`
+			let service = TimeoutService(work: dummyAsyncWork(duration: 2.0))
+			
+			// Set up the time data we need
+			let startTime = mach_absolute_time()
+			let timeoutTime = 1.0
+			let targetTime = UInt64(timeoutTime * Double(NSEC_PER_SEC))
+			let leeway = UInt64(0.01 * Double(NSEC_PER_SEC))
+			
+			service.start(timeout: timeoutTime) { r in
+				// Measure and test the time elapsed
+				let endTime = mach_absolute_time()
+				XCTAssert(endTime - startTime > targetTime - leeway)
+				XCTAssert(endTime - startTime < targetTime + leeway)
+				
+				XCTAssert(r.value == nil)
+				ex.fulfill()
+			}
+			
+			// Wait for all scheduled actions to occur
+			waitForExpectations(timeout: 10, handler: nil)
+		}
+	#endif
+	
+	func testTimeoutServiceSuccess() {
 		let coordinator = DebugContextCoordinator()
 
-		// Test the success case
-		var result: Result<String>? = nil
-		let service = Service(context: coordinator.global, connect: StringService.withDelay(2.0))
-		service.connect(timeout: 10) { r in
+		var result: Result<String, Error>? = nil
+		let service = TimeoutService(context: coordinator.global, work: dummyAsyncWork(duration: 2.0))
+		service.start(timeout: 10) { r in
 			result = r
 		}
 		coordinator.runScheduledTasks()
 		coordinator.reset()
 		withExtendedLifetime(service) {}
-		XCTAssert(result?.value == StringService.value)
-
+		XCTAssert(result?.value == dummySuccessResponse)
 	}
 
-	func testConnectCancelled() {
+	func testTimeoutServiceCancelled() {
 		let coordinator = DebugContextCoordinator()
 		// Test the service released case
 		do {
-			let service = Service(context: coordinator.global, connect: StringService.withDelay(2.0))
-			service.connect(timeout: 10) { r in
+			let service = TimeoutService(context: coordinator.global, work: dummyAsyncWork(duration: 2.0))
+			service.start(timeout: 10) { r in
 				XCTFail()
 			}
 		}
 		coordinator.runScheduledTasks()
 	}
 
-	func testConnectTimeout() {
+	func testTimeoutServiceTimeout() {
 		let coordinator = DebugContextCoordinator()
-		let context = coordinator.syncQueue
+		let context = coordinator.syncQueue()
 
-		// Construct the `Service` using our debug context
-		let service = Service(context: context, connect: StringService.withDelay(2.0))
+		// Construct the `TimeoutService` using our debug context
+		let service = TimeoutService(context: context, work: dummyAsyncWork(duration: 2.0))
 
 		// Run the `connect` function
 		let timeoutTime = 1.0
-		var result: Result<String>? = nil
-		service.connect(timeout: timeoutTime) { r in
+		var result: Result<String, Error>? = nil
+		service.start(timeout: timeoutTime) { r in
 			result = r
 			XCTAssert(coordinator.currentTime == UInt64(timeoutTime * Double(NSEC_PER_SEC)))
 			XCTAssert(coordinator.currentThread.matches(context))
@@ -489,117 +527,85 @@ class DebugContextTests: XCTestCase {
 		coordinator.runScheduledTasks()
 
 		// Ensure we got the correct result
-		XCTAssert(result?.error as? ServiceError == ServiceError.timeout)
+		XCTAssert(result?.error as? TimeoutService.Timeout != nil)
 
 		withExtendedLifetime(service) {}
 	}
 }
 
-class CancellableTimerAndAction: Cancellable {
-	var timer: Cancellable? = nil
-	var action: Cancellable? = nil
-	init() {
-	}
-	func cancel() {
-		timer?.cancel()
-		action?.cancel()
-	}
-}
-
-class Service {
-   // This service performs one action at a time, lifetime tied to the service
+class TimeoutService {
+	struct Timeout: Error {}
+	
+	// This service performs one action at a time, lifetime tied to the service
 	// The service retains the timeout timer which, in turn, returns the
 	// underlying service
-   var currentAction: Cancellable? = nil
-   
-	// Define the interface for the underlying connection
-	typealias ConnectionFunction = (Exec, @escaping (Result<String>) -> ()) -> Cancellable
-
-   // This is the configurable connection to the underlying service
-   let underlyingConnect: ConnectionFunction
-
-   // Every action for this service should occur in in this queue
-   let context: Exec
+	var currentAction: Lifetime? = nil
 	
-   // Construction of the Service lets us specify the underlying service
-   init(context: Exec = .global, connect: @escaping ConnectionFunction = NetworkService.init) {
-      self.underlyingConnect = connect
+	// Define the interface for the underlying connection
+	typealias ResultHandler = (Result<String, Error>) -> Void
+	typealias WorkFunction = (Exec, @escaping ResultHandler) -> Lifetime
+
+	// This is the configurable connection to the underlying service
+	let work: WorkFunction
+
+	// Every action for this service should occur in in this queue
+	let context: Exec
+	
+	// Construction of the Service lets us specify the underlying service
+	init(context: Exec = .global, work: @escaping WorkFunction = NetworkService.init) {
+		self.work = work
 		self.context = context.serialized()
-   }
+	}
 
-   // This `Service` invokes the `underlyingConnect` and starts a timer
-   func connect(timeout seconds: Double, handler: @escaping (Result<String>) -> ()) {
-      var previousAction: Cancellable? = nil
-      context.invokeAndWait {
-         previousAction = self.currentAction
+	// This `TimeoutService` invokes the `underlyingConnect` and starts a timer
+	func start(timeout seconds: Double, handler: @escaping ResultHandler) {
+		var previousAction: Lifetime? = nil
+		context.invokeSync {
+			previousAction = self.currentAction
 
-         // The action and the timer need to be cross-linked (each referring to the other).
-         // This would be a reference counted loop so we need to make sure they refer to
-         // each other weakly. That is done through this `CancellableTimerAndAction` object
-         // which does nothing except hold the timer and action and invoke `cancel` on them
-         // when `cancel` is invoked upon it.
-         // 
-         // Using an "action-specific" object instead of `self` (which might be resused
-         // later with another timer and action) prevents this action accidentally
-         // interfering with a subsequent action if this action is replaced.
-         let timerAndAction = CancellableTimerAndAction()
+			let current = AggregateLifetime()
 			
-      	// Run the underlying connection
-         let underlyingAction = self.underlyingConnect(self.context) { [weak timerAndAction] result in
-            // Cancel the timer if the success occurs first
-            timerAndAction?.cancel()
-            handler(result)
-         }
-         
-         // Run the timeout timer
-         let timer = self.context.singleTimer(interval:
-            DispatchTimeInterval.fromSeconds(seconds)) { [weak timerAndAction] in
-            // Cancel the connection if the timer fires first
-            timerAndAction?.cancel()
-            handler(.failure(ServiceError.timeout))
-         }
+			// Run the underlying connection
+			let underlyingAction = self.work(self.context) { [weak current] result in
+				// Cancel the timer if the success occurs first
+				current?.cancel()
+				handler(result)
+			}
 			
-			timerAndAction.timer = timer
-			timerAndAction.action = underlyingAction
-         self.currentAction = timerAndAction
-      }
-      
-      // Good rule of thumb: never release lifetime objects inside a mutex
-      withExtendedLifetime(previousAction) {}
-   }
+			// Run the timeout timer
+			let timer = self.context.singleTimer(interval: .interval(seconds)) { [weak current] in
+				// Cancel the connection if the timer fires first
+				current?.cancel()
+				handler(.failure(Timeout()))
+			}
+			
+			current += timer
+			current += underlyingAction
+			self.currentAction = current
+		}
+		
+		// Good rule of thumb: never release lifetime objects inside a mutex
+		withExtendedLifetime(previousAction) {}
+	}
 }
 
-enum ServiceError: Error {
-	case timeout
-}
-
-// Used as a drop-in replacement for NetworkService to illustrate dependency injection.
-class StringService: Cancellable {
-	static let value = "Here's a string"
-	var timer: Cancellable
-	init(delay seconds: Double, context: Exec, handler: @escaping (Result<String>) -> ()) {
-		timer = context.singleTimer(interval: DispatchTimeInterval.fromSeconds(seconds)) {
-			handler(.success(StringService.value))
-   	}
-	}
-	func cancel() {
-		timer.cancel()
-	}
-	static func withDelay(_ seconds: Double) -> Service.ConnectionFunction {
-		return { context, handler in
-			StringService(delay: seconds, context: context, handler: handler)
+let dummySuccessResponse = "Here's a string"
+func dummyAsyncWork(duration: Double) -> TimeoutService.WorkFunction {
+	return { exec, handler in
+		exec.singleTimer(interval: .interval(duration)) {
+			handler(.success(dummySuccessResponse))
 		}
 	}
 }
 
+
 // Dummy network service used to fulfill interface requirements. Obviously, doesn't really connect to the network but you could imagine something that fetches an HTTP resource.
-class NetworkService: Cancellable {
-	static let value = "Not really a network service"
-	var timer: Cancellable
-	init(context: Exec, handler: @escaping (Result<String>) -> ()) {
-		timer = context.singleTimer(interval: DispatchTimeInterval.fromSeconds(5.0)) {
-			handler(.success(StringService.value))
-   	}
+class NetworkService: Lifetime {
+	var timer: Lifetime
+	init(context: Exec, handler: @escaping TimeoutService.ResultHandler) {
+		timer = context.singleTimer(interval: .interval(5.0)) {
+			handler(.success(dummySuccessResponse))
+		}
 	}
 	func cancel() {
 		timer.cancel()

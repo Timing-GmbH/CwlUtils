@@ -20,6 +20,20 @@
 
 import Foundation
 
+#if !swift(>=4.2)
+	public protocol RandomNumberGenerator {
+		mutating func next() -> UInt64
+	}
+	public struct SystemRandomNumberGenerator: RandomNumberGenerator {
+		public init() {}
+		public mutating func next() -> UInt64 {
+			var value: UInt64 = 0
+			arc4random_buf(&value, MemoryLayout<UInt64>.size)
+			return value
+		}
+	}
+#endif
+
 public protocol RandomGenerator: RandomNumberGenerator {
 	mutating func randomize(buffer: UnsafeMutableRawBufferPointer)
 }
@@ -83,7 +97,7 @@ public struct Xoshiro: RandomNumberGenerator {
 		// by David Blackman and Sebastiano Vigna
 		let x = state.1 &* 5
 		let result = ((x &<< 7) | (x &>> 57)) &* 9
-		let t = state.1 << 17
+		let t = state.1 &<< 17
 		state.2 ^= state.0
 		state.3 ^= state.1
 		state.1 ^= state.2
