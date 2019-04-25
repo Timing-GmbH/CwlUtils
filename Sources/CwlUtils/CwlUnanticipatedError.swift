@@ -26,7 +26,7 @@ import MobileCoreServices
 #endif
 
 public protocol ErrorRecoveryAttempter: class {
-	func localizedRecoveryOptions() -> [String]
+	func localizedRecoveryOptions(for error: Error?) -> [String]
 	func makeRecoverySuggestion(directory: String, filename: String, line: Int) -> String
 }
 
@@ -52,7 +52,7 @@ public extension Error {
 		let directory = ((file as NSString).deletingLastPathComponent as NSString).lastPathComponent
 		let filename = (file as NSString).lastPathComponent
 		userInfo[NSLocalizedRecoverySuggestionErrorKey] = defaultErrorRecoveryAttempter.makeRecoverySuggestion(directory: directory, filename: filename, line: line)
-		userInfo[NSLocalizedRecoveryOptionsErrorKey] = defaultErrorRecoveryAttempter.localizedRecoveryOptions()
+		userInfo[NSLocalizedRecoveryOptionsErrorKey] = defaultErrorRecoveryAttempter.localizedRecoveryOptions(for: self)
 		userInfo[NSRecoveryAttempterErrorKey] = defaultErrorRecoveryAttempter
 
 		// Attach the call stack
@@ -80,7 +80,7 @@ open class UnanticipatedErrorRecoveryAttempter: NSObject, ErrorRecoveryAttempter
 	public static let PreviousRecoverySuggestionKey = "CwlUtils.PreviousRecoverySuggestion"
 
 	/// Present two buttons: "Copy details" and "OK"
-	open func localizedRecoveryOptions() -> [String] {
+	open func localizedRecoveryOptions(for error: Error?) -> [String] {
 		return [NSLocalizedString("OK", comment:""), NSLocalizedString("Copy details", comment:"")]
 	}
 	
