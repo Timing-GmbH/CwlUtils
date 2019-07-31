@@ -23,8 +23,6 @@
 /* Begin PBXBuildFile section */
 		C9075587219128D100C34A11 /* CwlUtils.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C95BDEB61E41688B00AAA64B /* CwlUtils.framework */; };
 		C9075588219128DA00C34A11 /* CwlPreconditionTesting.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C98C44BF2160EE670028B2AC /* CwlPreconditionTesting.framework */; };
-		C9075589219128EF00C34A11 /* CwlUtils.framework in Resources */ = {isa = PBXBuildFile; fileRef = C95BDEB61E41688B00AAA64B /* CwlUtils.framework */; };
-		C907558A219128FC00C34A11 /* CwlUtils.framework in Resources */ = {isa = PBXBuildFile; fileRef = C95BDEB61E41688B00AAA64B /* CwlUtils.framework */; };
 		C910EFEB21F29DB30013639B /* CwlCustomExecutionContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = C910EFEA21F29DB30013639B /* CwlCustomExecutionContext.swift */; };
 		C910EFF121F29E540013639B /* CwlSerializingContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = C910EFF021F29E540013639B /* CwlSerializingContext.swift */; };
 		C94D2B7F21919BEA00B6D53B /* CwlAddressInfoTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_40 /* CwlAddressInfoTests.swift */; };
@@ -39,7 +37,6 @@
 		C94D2B8821919BEA00B6D53B /* CwlOnDeleteTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_49 /* CwlOnDeleteTests.swift */; };
 		C94D2B8921919BEA00B6D53B /* CwlRandomTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_50 /* CwlRandomTests.swift */; };
 		C94D2B8A21919BEA00B6D53B /* mt19937-64.c in Sources */ = {isa = PBXBuildFile; fileRef = C9EE87C61E4171FD00A7408F /* mt19937-64.c */; };
-		C94D2B8B21919BEA00B6D53B /* CwlResultTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_51 /* CwlResultTests.swift */; };
 		C94D2B8C21919BEA00B6D53B /* xoshiro256starstar.c in Sources */ = {isa = PBXBuildFile; fileRef = C9EE87C71E4171FD00A7408F /* xoshiro256starstar.c */; };
 		C94D2B8D21919BEA00B6D53B /* CwlScalarScannerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_52 /* CwlScalarScannerTests.swift */; };
 		C94D2B8E21919BEA00B6D53B /* CwlStackFrameTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_53 /* CwlStackFrameTests.swift */; };
@@ -61,8 +58,7 @@
 		C95A77521E4187FB00659DBD /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C95A77511E4187FB00659DBD /* Assets.xcassets */; };
 		C95A77551E4187FB00659DBD /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = C95A77531E4187FB00659DBD /* LaunchScreen.storyboard */; };
 		C95A77601E4187FB00659DBD /* CwlUtils_iOSTestAppUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C95A775F1E4187FB00659DBD /* CwlUtils_iOSTestAppUITests.swift */; };
-		C95A77721E418F4C00659DBD /* CwlUtils.framework in Copy CwlUtils to the test app Frameworks folder */ = {isa = PBXBuildFile; fileRef = C95BDEB61E41688B00AAA64B /* CwlUtils.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
-		C95ADE862144CF3900EA820D /* CwlTransformations.swift in Sources */ = {isa = PBXBuildFile; fileRef = C95ADE852144CF3900EA820D /* CwlTransformations.swift */; };
+		C95A77721E418F4C00659DBD /* CwlUtils.framework in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = C95BDEB61E41688B00AAA64B /* CwlUtils.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		C95BDE9D1E41688B00AAA64B /* CwlAddressInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_16 /* CwlAddressInfo.swift */; };
 		C95BDE9E1E41688B00AAA64B /* CwlCollection.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_17 /* CwlCollection.swift */; };
 		C95BDE9F1E41688B00AAA64B /* CwlDebugContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_18 /* CwlDebugContext.swift */; };
@@ -93,18 +89,21 @@
 		C95BDEC81E4168B800AAA64B /* CwlMutexTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_48 /* CwlMutexTests.swift */; };
 		C95BDECA1E4168B800AAA64B /* CwlOnDeleteTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_49 /* CwlOnDeleteTests.swift */; };
 		C95BDECB1E4168B800AAA64B /* CwlRandomTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_50 /* CwlRandomTests.swift */; };
-		C95BDECC1E4168B800AAA64B /* CwlResultTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_51 /* CwlResultTests.swift */; };
 		C95BDECE1E4168B800AAA64B /* CwlScalarScannerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_52 /* CwlScalarScannerTests.swift */; };
 		C95BDECF1E4168B800AAA64B /* CwlStackFrameTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_53 /* CwlStackFrameTests.swift */; };
 		C95BDED11E4168B800AAA64B /* CwlSysctlTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_54 /* CwlSysctlTests.swift */; };
 		C95BDED41E4168B800AAA64B /* CwlUnanticipatedErrorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_55 /* CwlUnanticipatedErrorTests.swift */; };
 		C95BDED51E4168B800AAA64B /* CwlWrapperTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_56 /* CwlWrapperTests.swift */; };
+		C961E8D92281057F005268CF /* CwlUtils.framework in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = C95BDEB61E41688B00AAA64B /* CwlUtils.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		C973087F217C9840001EF603 /* mt19937-64.c in Sources */ = {isa = PBXBuildFile; fileRef = C9EE87C61E4171FD00A7408F /* mt19937-64.c */; };
 		C9730880217C9841001EF603 /* mt19937-64.c in Sources */ = {isa = PBXBuildFile; fileRef = C9EE87C61E4171FD00A7408F /* mt19937-64.c */; };
 		C98031632200014B0028A26B /* CwlFew.swift in Sources */ = {isa = PBXBuildFile; fileRef = C98031622200014B0028A26B /* CwlFew.swift */; };
 		C98AE774216243CC004259B6 /* CwlCatchException.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C98AE773216243CC004259B6 /* CwlCatchException.framework */; };
 		C98AE77E21624464004259B6 /* CwlCatchException.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C98AE773216243CC004259B6 /* CwlCatchException.framework */; };
 		C98C44CC2160EEBA0028B2AC /* CwlPreconditionTesting.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C98C44BF2160EE670028B2AC /* CwlPreconditionTesting.framework */; };
+		C9B2294A22336F4D00AD9740 /* CwlCaseNameCodable.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9B2294922336F4D00AD9740 /* CwlCaseNameCodable.swift */; };
+		C9B2295022336F7700AD9740 /* CwlCaseNameCodableTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9B2294F22336F7700AD9740 /* CwlCaseNameCodableTests.swift */; };
+		C9B2295122336F7700AD9740 /* CwlCaseNameCodableTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9B2294F22336F7700AD9740 /* CwlCaseNameCodableTests.swift */; };
 		C9D0DA242201A99C00CF8AD1 /* CwlExecutionType.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9D0DA232201A99C00CF8AD1 /* CwlExecutionType.swift */; };
 		C9DD3DA91E41E26600E23B15 /* CwlUtils.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C95BDEB61E41688B00AAA64B /* CwlUtils.framework */; };
 		C9E6BD58217C177A006DF3C6 /* CwlDeque.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_20 /* CwlDeque.swift */; };
@@ -121,7 +120,6 @@
 		OBJ_211 /* CwlMutexTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_48 /* CwlMutexTests.swift */; };
 		OBJ_212 /* CwlOnDeleteTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_49 /* CwlOnDeleteTests.swift */; };
 		OBJ_213 /* CwlRandomTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_50 /* CwlRandomTests.swift */; };
-		OBJ_214 /* CwlResultTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_51 /* CwlResultTests.swift */; };
 		OBJ_215 /* CwlScalarScannerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_52 /* CwlScalarScannerTests.swift */; };
 		OBJ_216 /* CwlStackFrameTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_53 /* CwlStackFrameTests.swift */; };
 		OBJ_217 /* CwlSysctlTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_54 /* CwlSysctlTests.swift */; };
@@ -189,25 +187,26 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
-		C95A776E1E418EB600659DBD /* Copy CwlUtils to the test app Frameworks folder */ = {
+		C95A776E1E418EB600659DBD /* Copy Frameworks */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
+				C961E8D92281057F005268CF /* CwlUtils.framework in Copy Frameworks */,
 			);
-			name = "Copy CwlUtils to the test app Frameworks folder";
+			name = "Copy Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		C95A77711E418F4300659DBD /* Copy CwlUtils to the test app Frameworks folder */ = {
+		C95A77711E418F4300659DBD /* Copy Frameworks */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				C95A77721E418F4C00659DBD /* CwlUtils.framework in Copy CwlUtils to the test app Frameworks folder */,
+				C95A77721E418F4C00659DBD /* CwlUtils.framework in Copy Frameworks */,
 			);
-			name = "Copy CwlUtils to the test app Frameworks folder";
+			name = "Copy Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXCopyFilesBuildPhase section */
@@ -234,7 +233,6 @@
 		C95A77561E4187FB00659DBD /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		C95A775B1E4187FB00659DBD /* CwlUtils_iOSTestAppUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CwlUtils_iOSTestAppUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		C95A775F1E4187FB00659DBD /* CwlUtils_iOSTestAppUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CwlUtils_iOSTestAppUITests.swift; sourceTree = "<group>"; };
-		C95ADE852144CF3900EA820D /* CwlTransformations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CwlTransformations.swift; sourceTree = "<group>"; };
 		C95BDE821E40B64700AAA64B /* CwlUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CwlUtils.h; sourceTree = "<group>"; };
 		C95BDE921E40B7D800AAA64B /* CwlDequePerformanceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CwlDequePerformanceTests.swift; sourceTree = "<group>"; };
 		C95BDE931E40B7D800AAA64B /* CwlMutexPerformanceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CwlMutexPerformanceTests.swift; sourceTree = "<group>"; };
@@ -244,6 +242,8 @@
 		C98031622200014B0028A26B /* CwlFew.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CwlFew.swift; sourceTree = "<group>"; };
 		C98AE773216243CC004259B6 /* CwlCatchException.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = CwlCatchException.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		C98C44AE2160EE670028B2AC /* CwlPreconditionTesting.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = CwlPreconditionTesting.xcodeproj; path = CwlPreconditionTesting/CwlPreconditionTesting.xcodeproj; sourceTree = "<group>"; };
+		C9B2294922336F4D00AD9740 /* CwlCaseNameCodable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CwlCaseNameCodable.swift; sourceTree = "<group>"; };
+		C9B2294F22336F7700AD9740 /* CwlCaseNameCodableTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CwlCaseNameCodableTests.swift; sourceTree = "<group>"; };
 		C9D0DA232201A99C00CF8AD1 /* CwlExecutionType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CwlExecutionType.swift; sourceTree = "<group>"; };
 		C9D734B8211EB3C300804C4E /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 		C9DD3D3B1E41A7D400E23B15 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -282,7 +282,6 @@
 		OBJ_48 /* CwlMutexTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CwlMutexTests.swift; sourceTree = "<group>"; };
 		OBJ_49 /* CwlOnDeleteTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CwlOnDeleteTests.swift; sourceTree = "<group>"; };
 		OBJ_50 /* CwlRandomTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CwlRandomTests.swift; sourceTree = "<group>"; };
-		OBJ_51 /* CwlResultTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CwlResultTests.swift; sourceTree = "<group>"; };
 		OBJ_52 /* CwlScalarScannerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CwlScalarScannerTests.swift; sourceTree = "<group>"; };
 		OBJ_53 /* CwlStackFrameTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CwlStackFrameTests.swift; sourceTree = "<group>"; };
 		OBJ_54 /* CwlSysctlTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CwlSysctlTests.swift; sourceTree = "<group>"; };
@@ -484,6 +483,7 @@
 			isa = PBXGroup;
 			children = (
 				OBJ_16 /* CwlAddressInfo.swift */,
+				C9B2294922336F4D00AD9740 /* CwlCaseNameCodable.swift */,
 				OBJ_17 /* CwlCollection.swift */,
 				C910EFEA21F29DB30013639B /* CwlCustomExecutionContext.swift */,
 				OBJ_18 /* CwlDebugContext.swift */,
@@ -503,7 +503,6 @@
 				C910EFF021F29E540013639B /* CwlSerializingContext.swift */,
 				OBJ_29 /* CwlStackFrame.swift */,
 				OBJ_30 /* CwlSysctl.swift */,
-				C95ADE852144CF3900EA820D /* CwlTransformations.swift */,
 				OBJ_31 /* CwlUnanticipatedError.swift */,
 				C95BDE821E40B64700AAA64B /* CwlUtils.h */,
 				OBJ_32 /* CwlWrappers.swift */,
@@ -548,6 +547,7 @@
 			isa = PBXGroup;
 			children = (
 				OBJ_40 /* CwlAddressInfoTests.swift */,
+				C9B2294F22336F7700AD9740 /* CwlCaseNameCodableTests.swift */,
 				OBJ_41 /* CwlCollectionTests.swift */,
 				OBJ_42 /* CwlDebugContextTests.swift */,
 				OBJ_43 /* CwlDeferredWorkTests.swift */,
@@ -558,7 +558,6 @@
 				OBJ_48 /* CwlMutexTests.swift */,
 				OBJ_49 /* CwlOnDeleteTests.swift */,
 				OBJ_50 /* CwlRandomTests.swift */,
-				OBJ_51 /* CwlResultTests.swift */,
 				OBJ_52 /* CwlScalarScannerTests.swift */,
 				OBJ_53 /* CwlStackFrameTests.swift */,
 				OBJ_54 /* CwlSysctlTests.swift */,
@@ -646,7 +645,7 @@
 				C95A77231E4187E600659DBD /* Sources */,
 				C95A77241E4187E600659DBD /* Frameworks */,
 				C95A77251E4187E600659DBD /* Resources */,
-				C95A776E1E418EB600659DBD /* Copy CwlUtils to the test app Frameworks folder */,
+				C95A776E1E418EB600659DBD /* Copy Frameworks */,
 			);
 			buildRules = (
 			);
@@ -682,7 +681,7 @@
 				C95A77441E4187FB00659DBD /* Sources */,
 				C95A77451E4187FB00659DBD /* Frameworks */,
 				C95A77461E4187FB00659DBD /* Resources */,
-				C95A77711E418F4300659DBD /* Copy CwlUtils to the test app Frameworks folder */,
+				C95A77711E418F4300659DBD /* Copy Frameworks */,
 			);
 			buildRules = (
 			);
@@ -768,7 +767,7 @@
 			isa = PBXProject;
 			attributes = {
 				LastSwiftUpdateCheck = 0900;
-				LastUpgradeCheck = 1010;
+				LastUpgradeCheck = 1020;
 				ORGANIZATIONNAME = "Matt Gallagher ( https://www.cocoawithlove.com )";
 				TargetAttributes = {
 					C95A77261E4187E600659DBD = {
@@ -786,18 +785,24 @@
 						CreatedOnToolsVersion = 8.3;
 						TestTargetID = C95A77471E4187FB00659DBD;
 					};
+					C95BDE9A1E41688B00AAA64B = {
+						LastSwiftMigration = 1020;
+					};
+					C95BDEB81E4168B800AAA64B = {
+						LastSwiftMigration = 1020;
+					};
 					C9DE4E1521325B1800CE7DAF = {
 						CreatedOnToolsVersion = 10.0;
 						ProvisioningStyle = Automatic;
 					};
 					OBJ_198 = {
-						LastSwiftMigration = 0900;
+						LastSwiftMigration = 1020;
 					};
 				};
 			};
 			buildConfigurationList = OBJ_2 /* Build configuration list for PBXProject "CwlUtils" */;
 			compatibilityVersion = "Xcode 3.2";
-			developmentRegion = English;
+			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
@@ -863,7 +868,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				C907558A219128FC00C34A11 /* CwlUtils.framework in Resources */,
 				C95A772E1E4187E600659DBD /* Assets.xcassets in Resources */,
 				C95A77311E4187E600659DBD /* Main.storyboard in Resources */,
 			);
@@ -880,7 +884,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				C9075589219128EF00C34A11 /* CwlUtils.framework in Resources */,
 				C95A77551E4187FB00659DBD /* LaunchScreen.storyboard in Resources */,
 				C95A77521E4187FB00659DBD /* Assets.xcassets in Resources */,
 				C95A77501E4187FB00659DBD /* Main.storyboard in Resources */,
@@ -930,7 +933,6 @@
 				C94D2B8821919BEA00B6D53B /* CwlOnDeleteTests.swift in Sources */,
 				C94D2B8921919BEA00B6D53B /* CwlRandomTests.swift in Sources */,
 				C94D2B8A21919BEA00B6D53B /* mt19937-64.c in Sources */,
-				C94D2B8B21919BEA00B6D53B /* CwlResultTests.swift in Sources */,
 				C94D2B8C21919BEA00B6D53B /* xoshiro256starstar.c in Sources */,
 				C94D2B8D21919BEA00B6D53B /* CwlScalarScannerTests.swift in Sources */,
 				C94D2B8E21919BEA00B6D53B /* CwlStackFrameTests.swift in Sources */,
@@ -994,10 +996,10 @@
 				C95BDEA71E41688B00AAA64B /* CwlRandom.swift in Sources */,
 				C95BDEA81E41688B00AAA64B /* CwlResult.swift in Sources */,
 				C9E6BD58217C177A006DF3C6 /* CwlDeque.swift in Sources */,
+				C9B2294A22336F4D00AD9740 /* CwlCaseNameCodable.swift in Sources */,
 				C95BDEA91E41688B00AAA64B /* CwlScalarScanner.swift in Sources */,
 				C95BDEAA1E41688B00AAA64B /* CwlStackFrame.swift in Sources */,
 				C95A622C1EA5D90C0059D152 /* CwlLifetime.swift in Sources */,
-				C95ADE862144CF3900EA820D /* CwlTransformations.swift in Sources */,
 				C95BDEAB1E41688B00AAA64B /* CwlSysctl.swift in Sources */,
 				C95BDEAC1E41688B00AAA64B /* CwlUnanticipatedError.swift in Sources */,
 				C95BDEAD1E41688B00AAA64B /* CwlWrappers.swift in Sources */,
@@ -1013,6 +1015,7 @@
 				C95BDEBD1E4168B800AAA64B /* CwlCollectionTests.swift in Sources */,
 				C95BDEBF1E4168B800AAA64B /* CwlDebugContextTests.swift in Sources */,
 				C95BDEC01E4168B800AAA64B /* CwlDeferredWorkTests.swift in Sources */,
+				C9B2295022336F7700AD9740 /* CwlCaseNameCodableTests.swift in Sources */,
 				C95BDEC11E4168B800AAA64B /* CwlDequeTests.swift in Sources */,
 				C95BDEC21E4168B800AAA64B /* CwlDispatchTests.swift in Sources */,
 				C95BDEC31E4168B800AAA64B /* CwlExecTests.swift in Sources */,
@@ -1021,7 +1024,6 @@
 				C95BDECA1E4168B800AAA64B /* CwlOnDeleteTests.swift in Sources */,
 				C95BDECB1E4168B800AAA64B /* CwlRandomTests.swift in Sources */,
 				C973087F217C9840001EF603 /* mt19937-64.c in Sources */,
-				C95BDECC1E4168B800AAA64B /* CwlResultTests.swift in Sources */,
 				C9EE87CB1E4171FD00A7408F /* xoshiro256starstar.c in Sources */,
 				C95BDECE1E4168B800AAA64B /* CwlScalarScannerTests.swift in Sources */,
 				C95BDECF1E4168B800AAA64B /* CwlStackFrameTests.swift in Sources */,
@@ -1039,6 +1041,7 @@
 				OBJ_204 /* CwlCollectionTests.swift in Sources */,
 				OBJ_205 /* CwlDebugContextTests.swift in Sources */,
 				OBJ_206 /* CwlDeferredWorkTests.swift in Sources */,
+				C9B2295122336F7700AD9740 /* CwlCaseNameCodableTests.swift in Sources */,
 				OBJ_207 /* CwlDequeTests.swift in Sources */,
 				OBJ_208 /* CwlDispatchTests.swift in Sources */,
 				OBJ_209 /* CwlExecTests.swift in Sources */,
@@ -1046,7 +1049,6 @@
 				OBJ_211 /* CwlMutexTests.swift in Sources */,
 				OBJ_212 /* CwlOnDeleteTests.swift in Sources */,
 				OBJ_213 /* CwlRandomTests.swift in Sources */,
-				OBJ_214 /* CwlResultTests.swift in Sources */,
 				C9EE87CA1E4171FD00A7408F /* xoshiro256starstar.c in Sources */,
 				OBJ_215 /* CwlScalarScannerTests.swift in Sources */,
 				OBJ_216 /* CwlStackFrameTests.swift in Sources */,
@@ -1341,7 +1343,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = "com.cocoawithlove.CwlUtils-macOSTests";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
-				SWIFT_COMPILATION_MODE = singlefile;
+				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_OBJC_BRIDGING_HEADER = "Tests/CwlUtilsTests/CwlUtilsTests-BridgingHeader.h";
 			};
 			name = Release;
@@ -1354,6 +1356,7 @@
 				CLANG_ENABLE_OBJC_ARC = YES;
 				COMBINE_HIDPI_IMAGES = YES;
 				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_TESTABILITY = YES;
 				GCC_OPTIMIZATION_LEVEL = 0;
@@ -1365,7 +1368,7 @@
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_INSTALL_OBJC_HEADER = NO;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
-				SWIFT_VERSION = 4.2;
+				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2,3,4";
 				TVOS_DEPLOYMENT_TARGET = 9.0;
 				WATCHOS_DEPLOYMENT_TARGET = 2.0;
@@ -1379,6 +1382,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
 				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
@@ -1386,7 +1390,7 @@
 				SUPPORTED_PLATFORMS = "macosx watchsimulator watchos appletvsimulator appletvos iphonesimulator iphoneos";
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_INSTALL_OBJC_HEADER = NO;
-				SWIFT_VERSION = 4.2;
+				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2,3,4";
 				TVOS_DEPLOYMENT_TARGET = 9.0;
 				VALIDATE_PRODUCT = YES;

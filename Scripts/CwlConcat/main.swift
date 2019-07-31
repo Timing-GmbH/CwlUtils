@@ -102,12 +102,12 @@ struct Concat {
 			? "direct inclusion in projects instead of library inclusion"
 			: "exposing from libraries or use in Swift Playgrounds"
 		let message = """
-			//
-			//  This file is part of a concatenation of the \(framework) framework with \(access)
-			//  interfaces for \(purpose)).
-			//  For details, visit: https://github.com/mattgallagher/\(framework)
-			//\n
-			"""
+		//
+		//  This file is part of a concatenation of the \(framework) framework with \(access)
+		//  interfaces for \(purpose)).
+		//  For details, visit: https://github.com/mattgallagher/\(framework)
+		//\n
+		"""
 		
 		let destination = URL(fileURLWithPath: buildDir).appendingPathComponent("Concat_\(access)")
 		let outputUrl = destination.appendingPathComponent(name)
@@ -117,7 +117,7 @@ struct Concat {
 			throw ProcessingError.cantCreateOutputFile(outputUrl.path)
 		}
 		let output = try FileHandle(forWritingTo: outputUrl)
-
+		
 		var preprocessed = [Include]()
 		var files = [String]()
 		for include in includes {
@@ -134,7 +134,7 @@ struct Concat {
 		
 		output.write(message)
 		output.write("""
-			//  Copyright © 2015-2018 Matt Gallagher ( https://www.cocoawithlove.com ). All rights reserved.
+			//  Copyright © 2015-2019 Matt Gallagher ( https://www.cocoawithlove.com ). All rights reserved.
 			//
 			//  Permission to use, copy, modify, and/or distribute this software for any
 			//  purpose with or without fee is hereby granted, provided that the above
@@ -170,7 +170,7 @@ struct Concat {
 	static func processAllFromCommandLine() throws {
 		guard let buildDir = env("BUILT_PRODUCTS_DIR") else { throw ProcessingError.missingEnvironment("BUILT_PRODUCTS_DIR") }
 		guard let srcDir = env("SRCROOT") else { throw ProcessingError.missingEnvironment("SRCROOT") }
-		guard let startIndex = ProcessInfo.processInfo.arguments.index(where: { $0 == "-f" }),
+		guard let startIndex = ProcessInfo.processInfo.arguments.firstIndex(where: { $0 == "-f" }),
 			ProcessInfo.processInfo.arguments.count >= startIndex + 6 else {
 				throw ProcessingError.mustStartWithName
 		}
@@ -202,6 +202,7 @@ struct Concat {
 					guard let enumerator = FileManager.default.enumerator(at: URL(fileURLWithPath: value), includingPropertiesForKeys: nil) else {
 						throw ProcessingError.fileNotFound(value)
 					}
+					var filePaths = [String]()
 					for file in enumerator {
 						let fileUrl = file as! URL
 						if outputs[outputs.count - 1].excludes.contains(fileUrl.path) {
@@ -211,7 +212,10 @@ struct Concat {
 							continue
 						}
 						if fileUrl.pathExtension != "swift" { continue }
-						outputs[outputs.count - 1].includes.append(.file(fileUrl.path))
+						filePaths.append(fileUrl.path)
+					}
+					for filePath in filePaths.sorted() {
+						outputs[outputs.count - 1].includes.append(.file(filePath))
 					}
 				} else {
 					outputs[outputs.count - 1].includes.append(.file(value))
