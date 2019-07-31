@@ -38,8 +38,9 @@ public extension Error {
 		let e = self as NSError
 		var userInfo: [String: Any] = e.userInfo
 		
-		if userInfo[NSLocalizedDescriptionKey] == nil {
-			userInfo[NSLocalizedDescriptionKey] = "\(e.domain).\(self)"
+		if (userInfo[NSLocalizedDescriptionKey] as? String)?.isEmpty != false {
+			let domainPrefix = e.domain != "SQLite.Result" ? e.domain + "." : ""
+			userInfo[NSLocalizedDescriptionKey] = domainPrefix + String(describing: self)
 		}
 		
 		// Move any existing NSLocalizedRecoverySuggestionErrorKey to a new key (we want to replace it but don't want to lose potentially useful information)
