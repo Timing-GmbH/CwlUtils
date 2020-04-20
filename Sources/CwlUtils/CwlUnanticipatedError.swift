@@ -38,7 +38,11 @@ public extension Error {
 		let e = self as NSError
 		var userInfo: [String: Any] = e.userInfo
 		
-		if (userInfo[NSLocalizedDescriptionKey] as? String)?.isEmpty != false {
+		if let errorDescription = (self as? LocalizedError)?.errorDescription {
+			userInfo[NSLocalizedDescriptionKey] = errorDescription
+		} else if let failureReason = (self as? LocalizedError)?.failureReason {
+			userInfo[NSLocalizedDescriptionKey] = failureReason
+		} else if (userInfo[NSLocalizedDescriptionKey] as? String)?.isEmpty != false {
 			let domainPrefix = e.domain != "SQLite.Result" ? e.domain + "." : ""
 			userInfo[NSLocalizedDescriptionKey] = domainPrefix + String(describing: self)
 		}
