@@ -34,7 +34,7 @@ public var defaultErrorRecoveryAttempter: ErrorRecoveryAttempter = Unanticipated
 
 public extension Error {
 	/// Return an NSError with the same properties as this error but with an `UnanticipatedErrorRecoveryAttempter` attached.
-	func withUnanticipatedErrorRecoveryAttempter(file: String = #file, line: Int = #line) -> NSError {
+	func withUnanticipatedErrorRecoveryAttempter(file: String = #fileID, line: Int = #line) -> NSError {
 		let e = self as NSError
 		var userInfo: [String: Any] = e.userInfo
 		
@@ -67,7 +67,7 @@ public extension Error {
 }
 
 // A function that returns an `Error` of a non-public type, that already has `withUnanticipatedErrorRecoveryAttempter`
-public func undeclaredError(file: String = #file, line: Int = #line) -> Error {
+public func undeclaredError(file: String = #fileID, line: Int = #line) -> Error {
 	struct UndeclaredError: LocalizedError {
 		var errorDescription: String? { return NSLocalizedString("An unspecified error occurred.", comment: "") }
 	}
@@ -75,7 +75,7 @@ public func undeclaredError(file: String = #file, line: Int = #line) -> Error {
 }
 
 /// A convenience wrapper that applies `withUnanticipatedErrorRecoveryAttempter` to any error thrown by the wrapped function
-public func rethrowUnanticipated<T>(file: String = #file, line: Int = #line, f: () throws -> T) throws -> T {
+public func rethrowUnanticipated<T>(file: String = #fileID, line: Int = #line, f: () throws -> T) throws -> T {
     do {
         return try f()
     } catch {
