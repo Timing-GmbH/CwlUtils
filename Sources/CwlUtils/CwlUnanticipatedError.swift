@@ -23,6 +23,14 @@ import Cocoa
 #elseif os(iOS)
 import UIKit
 import MobileCoreServices
+#else
+import Foundation
+#endif
+
+#if !canImport(Darwin)
+// Corelibs Foundation does not export CoreFoundation's bundle keys.
+private let kCFBundleNameKey = "CFBundleName"
+private let kCFBundleVersionKey = "CFBundleVersion"
 #endif
 
 public protocol ErrorRecoveryAttempter: class {
@@ -66,6 +74,14 @@ public extension Error {
 	}
 }
 
+#if !os(macOS) && !os(iOS)
+/// Where "Copy details" puts the error details on a platform without AppKit or UIKit: an app adopts
+/// this for `UnanticipatedErrorRecoveryAttempter` with its own pasteboard; without it nothing is copied.
+public protocol ErrorDetailsPasteboardWriting {
+	func writeErrorDetailsToPasteboard(_ details: String)
+}
+#endif
+
 // A function that returns an `Error` of a non-public type, that already has `withUnanticipatedErrorRecoveryAttempter`
 public func undeclaredError(file: String = #fileID, line: Int = #line) -> Error {
 	struct UndeclaredError: LocalizedError {
@@ -100,10 +116,12 @@ open class UnanticipatedErrorRecoveryAttempter: NSObject, ErrorRecoveryAttempter
 		return String(format: NSLocalizedString("The error occurred at line %ld of the %@/%@ file in the program's code.\n\nWhen reporting this error (e.g. via https://timingapp.com/contact), please make sure to attach the contents of the clipboard after pressing the \"Copy details\" button below.\n\nPlease also provide details on what you were doing when the error occurred.",  comment: ""), line, directory, filename)
 	}
 	
+	#if canImport(Darwin)
 	/// There are two possible `attemptRecoveryFromError` methods. This one just feeds into the other.
 	open override func attemptRecovery(fromError error: Error, optionIndex: Int, delegate: Any?, didRecoverSelector: Selector?, contextInfo: UnsafeMutableRawPointer?) -> Void {
 		_ = self.attemptRecovery(fromError: error, optionIndex: optionIndex)
 	}
+	#endif
 	
 	/// Generate the "detailed" information for the pasteboard (the error dialog itself will show the brief details)
 	open func extendedErrorInformation(_ error: NSError) -> String {
@@ -128,8 +146,20 @@ open class UnanticipatedErrorRecoveryAttempter: NSObject, ErrorRecoveryAttempter
 		return "\(applicationName)/\(applicationVersion), \(machineInfo), \(locales)\n\n\(localizedDescription)\n\(localizedRecoverySuggestion)\n\n\(error.domain): \(error.code). \(userInfo)\n\n\(callStackSymbols)"
 	}
 	
+	#if canImport(Darwin)
 	/// When a button is tapped, either close the dialog or copy the error details as appropriate.
 	open override func attemptRecovery(fromError error: Error, optionIndex: Int) -> Bool {
+		return copyDetailsIfChosen(fromError: error, optionIndex: optionIndex)
+	}
+	#else
+	/// When a button is tapped, either close the dialog or copy the error details as appropriate.
+	/// Without Objective-C, `NSObject` has no recovery method to override.
+	open func attemptRecovery(fromError error: Error, optionIndex: Int) -> Bool {
+		return copyDetailsIfChosen(fromError: error, optionIndex: optionIndex)
+	}
+	#endif
+
+	private func copyDetailsIfChosen(fromError error: Error, optionIndex: Int) -> Bool {
 		// The "Copy details" button is index 1 in the buttons array.
 		let copyDetailsButtonIndex = 1
 		
@@ -145,6 +175,8 @@ open class UnanticipatedErrorRecoveryAttempter: NSObject, ErrorRecoveryAttempter
 			#endif
 			#elseif os(iOS)
 			UIPasteboard.general.string = extendedErrorInformation(error as NSError)
+			#else
+			(self as? ErrorDetailsPasteboardWriting)?.writeErrorDetailsToPasteboard(extendedErrorInformation(error as NSError))
 			#endif
 			return true
 		default:
