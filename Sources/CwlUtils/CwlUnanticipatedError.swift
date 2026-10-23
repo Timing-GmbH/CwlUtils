@@ -25,12 +25,23 @@ import UIKit
 import MobileCoreServices
 #endif
 
+public protocol ErrorRecoveryAttempter: class {
+	func localizedRecoveryOptions(for error: Error?) -> [String]
+	func makeRecoverySuggestion(directory: String, filename: String, line: Int) -> String
+}
+
+public var defaultErrorRecoveryAttempter: ErrorRecoveryAttempter = UnanticipatedErrorRecoveryAttempter()
+
 public extension Error {
 	/// Return an NSError with the same properties as this error but with an `UnanticipatedErrorRecoveryAttempter` attached.
 	func withUnanticipatedErrorRecoveryAttempter(file: String = #file, line: Int = #line) -> NSError {
 		let e = self as NSError
 		var userInfo: [String: Any] = e.userInfo
 		
+		if userInfo[NSLocalizedDescriptionKey] == nil {
+			userInfo[NSLocalizedDescriptionKey] = "\(e.domain).\(self)"
+		}
+
 		// Move any existing NSLocalizedRecoverySuggestionErrorKey to a new key (we want to replace it but don't want to lose potentially useful information)
 		if let previousSuggestion = userInfo[NSLocalizedRecoverySuggestionErrorKey] {
 			userInfo[UnanticipatedErrorRecoveryAttempter.previousRecoverySuggestionKey] = previousSuggestion
@@ -39,12 +50,10 @@ public extension Error {
 		// Attach a new NSLocalizedRecoverySuggestionErrorKey and our recovery attempter and options
 		let directory = ((file as NSString).deletingLastPathComponent as NSString).lastPathComponent
 		let filename = (file as NSString).lastPathComponent
-		let suggestion = String(format: NSLocalizedString("The error occurred at line %ld of the %@/%@ file in the program's code.",  comment: ""), line, directory, filename)
-		userInfo[NSLocalizedDescriptionKey] = self.localizedDescription
-		userInfo[NSLocalizedRecoverySuggestionErrorKey] = suggestion
-		userInfo[NSLocalizedRecoveryOptionsErrorKey] = UnanticipatedErrorRecoveryAttempter.localizedRecoveryOptions()
-		userInfo[NSRecoveryAttempterErrorKey] = UnanticipatedErrorRecoveryAttempter()
-		
+		userInfo[NSLocalizedRecoverySuggestionErrorKey] = defaultErrorRecoveryAttempter.makeRecoverySuggestion(directory: directory, filename: filename, line: line)
+		userInfo[NSLocalizedRecoveryOptionsErrorKey] = defaultErrorRecoveryAttempter.localizedRecoveryOptions(for: self)
+		userInfo[NSRecoveryAttempterErrorKey] = defaultErrorRecoveryAttempter
+
 		// Attach the call stack
 		userInfo[UnanticipatedErrorRecoveryAttempter.callStackSymbols] = Thread.callStackSymbols
 		
@@ -61,16 +70,16 @@ public func undeclaredError(file: String = #file, line: Int = #line) -> Error {
 }
 
 /// A convenience wrapper that applies `withUnanticipatedErrorRecoveryAttempter` to any error thrown by the wrapped function
-public func rethrowUnanticipated<T>(file: String = #file, line: Int = #line, execute: () throws -> T) throws -> T {
-	do {
-		return try execute()
-	} catch {
-		throw error.withUnanticipatedErrorRecoveryAttempter(file: file, line: line)
-	}
+public func rethrowUnanticipated<T>(file: String = #file, line: Int = #line, f: () throws -> T) throws -> T {
+    do {
+        return try f()
+    } catch {
+        throw error.withUnanticipatedErrorRecoveryAttempter(file: file, line: line)
+    }
 }
 
 /// Class usable as the NSRecoveryAttempterErrorKey object in an NSError that presents the 'Unexpected' error and gives the option of copying the full error to the pasteboard.
-public class UnanticipatedErrorRecoveryAttempter: NSObject {
+open class UnanticipatedErrorRecoveryAttempter: NSObject, ErrorRecoveryAttempter {
 	/// Key used in NSError.userInfo dictionaries to store call stack addresses
 	public static let callStackSymbols = "CwlUtils.CallStackReturnAddresses"
 	
@@ -78,17 +87,21 @@ public class UnanticipatedErrorRecoveryAttempter: NSObject {
 	public static let previousRecoverySuggestionKey = "CwlUtils.PreviousRecoverySuggestion"
 	
 	/// Present two buttons: "Copy details" and "OK"
-	fileprivate class func localizedRecoveryOptions() -> [String] {
+	open func localizedRecoveryOptions(for error: Error?) -> [String] {
 		return [NSLocalizedString("OK", comment:""), NSLocalizedString("Copy details", comment:"")]
 	}
 	
+	open func makeRecoverySuggestion(directory: String, filename: String, line: Int) -> String {
+		return String(format: NSLocalizedString("The error occurred at line %ld of the %@/%@ file in the program's code.\n\nWhen reporting this error (e.g. via https://timingapp.com/contact), please make sure to attach the contents of the clipboard after pressing the \"Copy details\" button below.\n\nPlease also provide details on what you were doing when the error occurred.",  comment: ""), line, directory, filename)
+	}
+
 	/// There are two possible `attemptRecoveryFromError` methods. This one just feeds into the other.
-	public override func attemptRecovery(fromError error: Error, optionIndex: Int, delegate: Any?, didRecoverSelector: Selector?, contextInfo: UnsafeMutableRawPointer?) -> Void {
+	open override func attemptRecovery(fromError error: Error, optionIndex: Int, delegate: Any?, didRecoverSelector: Selector?, contextInfo: UnsafeMutableRawPointer?) -> Void {
 		_ = self.attemptRecovery(fromError: error, optionIndex: optionIndex)
 	}
 	
 	/// Generate the "detailed" information for the pasteboard (the error dialog itself will show the brief details)
-	private func extendedErrorInformation(_ error: NSError) -> String {
+	open func extendedErrorInformation(_ error: NSError) -> String {
 		var userInfo = error.userInfo
 		
 		// Fetch and format diagnostic information for display
@@ -111,7 +124,7 @@ public class UnanticipatedErrorRecoveryAttempter: NSObject {
 	}
 	
 	/// When a button is tapped, either close the dialog or copy the error details as appropriate.
-	public override func attemptRecovery(fromError error: Error, optionIndex: Int) -> Bool {
+	open override func attemptRecovery(fromError error: Error, optionIndex: Int) -> Bool {
 		// The "Copy details" button is index 1 in the buttons array.
 		let copyDetailsButtonIndex = 1
 		
