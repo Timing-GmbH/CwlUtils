@@ -54,7 +54,7 @@ public extension Error {
 			let domainPrefix = e.domain != "SQLite.Result" ? e.domain + "." : ""
 			userInfo[NSLocalizedDescriptionKey] = domainPrefix + String(describing: self)
 		}
-		
+
 		// Move any existing NSLocalizedRecoverySuggestionErrorKey to a new key (we want to replace it but don't want to lose potentially useful information)
 		if let previousSuggestion = userInfo[NSLocalizedRecoverySuggestionErrorKey] {
 			userInfo[UnanticipatedErrorRecoveryAttempter.previousRecoverySuggestionKey] = previousSuggestion
@@ -115,7 +115,7 @@ open class UnanticipatedErrorRecoveryAttempter: NSObject, ErrorRecoveryAttempter
 	open func makeRecoverySuggestion(directory: String, filename: String, line: Int) -> String {
 		return String(format: NSLocalizedString("The error occurred at line %ld of the %@/%@ file in the program's code.\n\nWhen reporting this error (e.g. via https://timingapp.com/contact), please make sure to attach the contents of the clipboard after pressing the \"Copy details\" button below.\n\nPlease also provide details on what you were doing when the error occurred.",  comment: ""), line, directory, filename)
 	}
-	
+
 	#if canImport(Darwin)
 	/// There are two possible `attemptRecoveryFromError` methods. This one just feeds into the other.
 	open override func attemptRecovery(fromError error: Error, optionIndex: Int, delegate: Any?, didRecoverSelector: Selector?, contextInfo: UnsafeMutableRawPointer?) -> Void {
